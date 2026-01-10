@@ -1,0 +1,180 @@
+package bjjapp.config;
+
+import bjjapp.entity.Professor;
+import bjjapp.entity.Turma;
+import bjjapp.entity.User;
+import bjjapp.enums.DiaSemana;
+import bjjapp.enums.Faixa;
+import bjjapp.enums.Modalidade;
+import bjjapp.enums.Role;
+import bjjapp.repository.ProfessorRepository;
+import bjjapp.repository.TurmaRepository;
+import bjjapp.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalTime;
+import java.util.Set;
+
+/**
+ * Inicializa dados de exemplo no banco de dados
+ */
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class DataLoader implements CommandLineRunner {
+
+    private final ProfessorRepository professorRepository;
+    private final TurmaRepository turmaRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public void run(String... args) {
+        log.info("Verificando dados iniciais...");
+
+        // Criar professores se não existirem
+        if (professorRepository.count() == 0) {
+            log.info("Criando professores de exemplo...");
+
+            professorRepository.save(Professor.builder()
+                .nome("Mestre Carlos Silva")
+                .faixa(Faixa.PRETA)
+                .grau(4)
+                .build());
+
+            professorRepository.save(Professor.builder()
+                .nome("Professor João Santos")
+                .faixa(Faixa.PRETA)
+                .grau(2)
+                .build());
+
+            professorRepository.save(Professor.builder()
+                .nome("Professor Pedro Lima")
+                .faixa(Faixa.MARROM)
+                .grau(3)
+                .build());
+
+            log.info("3 professores criados");
+        }
+
+        // Criar turmas se não existirem
+        if (turmaRepository.count() == 0) {
+            log.info("Criando turmas de exemplo...");
+
+            turmaRepository.save(Turma.builder()
+                .modalidade(Modalidade.GI)
+                .horario(LocalTime.of(7, 0))
+                .ativa(true)
+                .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
+                .build());
+
+            turmaRepository.save(Turma.builder()
+                .modalidade(Modalidade.GI)
+                .horario(LocalTime.of(19, 0))
+                .ativa(true)
+                .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
+                .build());
+
+            turmaRepository.save(Turma.builder()
+                .modalidade(Modalidade.NO_GI)
+                .horario(LocalTime.of(20, 0))
+                .ativa(true)
+                .dias(Set.of(DiaSemana.TERCA, DiaSemana.QUINTA))
+                .build());
+
+            turmaRepository.save(Turma.builder()
+                .modalidade(Modalidade.KIDS)
+                .horario(LocalTime.of(17, 0))
+                .ativa(true)
+                .dias(Set.of(DiaSemana.SABADO))
+                .build());
+
+            log.info("4 turmas criadas");
+        }
+
+        // Criar alunos se não existirem
+        if (userRepository.count() == 0) {
+            log.info("Criando alunos de exemplo...");
+
+            userRepository.save(User.builder()
+                .nome("Maria Silva")
+                .faixa(Faixa.BRANCA)
+                .grau(0)
+                .idade(25)
+                .aulasAcumuladas(15)
+                .aulasDesdeUltimaGraduacao(15)
+                .role(Role.ALUNO)
+                .build());
+
+            userRepository.save(User.builder()
+                .nome("José Santos")
+                .faixa(Faixa.AZUL)
+                .grau(2)
+                .idade(30)
+                .aulasAcumuladas(80)
+                .aulasDesdeUltimaGraduacao(25)
+                .role(Role.ALUNO)
+                .build());
+
+            userRepository.save(User.builder()
+                .nome("Ana Oliveira")
+                .faixa(Faixa.ROXA)
+                .grau(1)
+                .idade(28)
+                .aulasAcumuladas(150)
+                .aulasDesdeUltimaGraduacao(10)
+                .role(Role.ALUNO)
+                .build());
+
+            userRepository.save(User.builder()
+                .nome("Carlos Ferreira")
+                .faixa(Faixa.BRANCA)
+                .grau(3)
+                .idade(22)
+                .aulasAcumuladas(55)
+                .aulasDesdeUltimaGraduacao(35)
+                .role(Role.ALUNO)
+                .build());
+
+            userRepository.save(User.builder()
+                .nome("Fernanda Costa")
+                .faixa(Faixa.MARROM)
+                .grau(0)
+                .idade(35)
+                .aulasAcumuladas(200)
+                .aulasDesdeUltimaGraduacao(5)
+                .role(Role.ALUNO)
+                .build());
+
+            log.info("5 alunos criados");
+        }
+
+        // Criar usuário admin se não existir
+        if (userRepository.findByRole(Role.ADMIN).isEmpty()) {
+            log.info("Criando usuário admin...");
+
+            User admin = User.builder()
+                .nome("Administrador")
+                .role(Role.ADMIN)
+                .build();
+
+            // O UserService vai gerar username e password automaticamente
+            // Para fins de demonstração, vamos definir manualmente
+            admin.setUsername("admin");
+            admin.setPassword("$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"); // senha: password
+
+            userRepository.save(admin);
+
+            log.info("Usuário admin criado:");
+            log.info("Username: admin");
+            log.info("Password: password");
+        }
+
+        log.info("Dados iniciais verificados!");
+        log.info("Professores: {}", professorRepository.count());
+        log.info("Turmas: {}", turmaRepository.count());
+        log.info("Alunos: {}", userRepository.count());
+    }
+}
