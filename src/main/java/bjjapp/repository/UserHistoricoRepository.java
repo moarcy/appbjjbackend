@@ -12,11 +12,11 @@ import java.util.List;
 @Repository
 public interface UserHistoricoRepository extends JpaRepository<UserHistorico, Long> {
 
-    List<UserHistorico> findByUserIdOrderByDataHoraDesc(Long userId);
+    List<UserHistorico> findByUserIdOrderByDataHoraAlteracaoDesc(Long userId);
 
     List<UserHistorico> findByUserIdAndTipoAlteracao(Long userId, TipoAlteracao tipo);
 
-    List<UserHistorico> findByDataHoraBetween(LocalDateTime inicio, LocalDateTime fim);
+    List<UserHistorico> findByDataHoraAlteracaoBetween(LocalDateTime inicio, LocalDateTime fim);
 
     List<UserHistorico> findByTipoAlteracao(TipoAlteracao tipo);
 
