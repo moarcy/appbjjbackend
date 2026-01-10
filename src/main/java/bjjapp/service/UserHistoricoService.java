@@ -38,7 +38,7 @@ public class UserHistoricoService {
 
     @Transactional(readOnly = true)
     public List<UserHistorico> findByUserId(Long userId) {
-        return historicoRepository.findByUserIdOrderByDataHoraDesc(userId);
+        return historicoRepository.findByUserIdOrderByDataHoraAlteracaoDesc(userId);
     }
 
     @Transactional(readOnly = true)
