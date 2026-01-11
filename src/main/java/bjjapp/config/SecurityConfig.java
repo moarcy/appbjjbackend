@@ -30,8 +30,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/auth/login",
-                    "/api/auth/register"
+                    "/auth/login",
+                    "/auth/register"
                 ).permitAll()
                 .requestMatchers("/api/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/api/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
@@ -47,8 +47,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/api/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+            );
+            // Temporariamente removido o filtro JWT para testar
+            // .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
