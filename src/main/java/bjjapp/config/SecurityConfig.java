@@ -25,10 +25,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults())  // Habilita CORS
-            .csrf(csrf -> csrf.disable())  // Desabilita CSRF para APIs
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(
+                    "/api/auth/login",
+                    "/api/auth/register"
+                ).permitAll()
                 .requestMatchers("/api/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/api/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/api/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
@@ -44,7 +47,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);  // Adiciona filtro JWT
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
