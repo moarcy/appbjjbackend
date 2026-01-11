@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/turmas")
+@RequestMapping("/turmas")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000"})
 public class TurmaController {

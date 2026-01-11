@@ -33,21 +33,6 @@ public class SecurityConfig {
                     "/auth/login",
                     "/auth/register"
                 ).permitAll()
-                // Endpoints com /api
-                .requestMatchers("/api/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/users/historico/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/users/save").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/api/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/api/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
-                // Endpoints sem /api (para compatibilidade com frontend)
                 .requestMatchers("/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
