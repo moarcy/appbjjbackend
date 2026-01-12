@@ -212,8 +212,17 @@ public class UserService {
     }
 
     // Métodos para autenticação
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByUsernameAuth(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public List<User> findByRole(Role role) {
+        return userRepository.findByRoleAndAtivoTrue(role);
+    }
+
+    public List<User> findByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        return user.map(List::of).orElse(List.of());
     }
 
     public boolean checkPassword(String rawPassword, String encodedPassword) {
@@ -226,26 +235,5 @@ public class UserService {
             .role(Role.PROFESSOR)
             .build();
         return save(professor);
-    }
-
-    public UserPlainPassword getCredenciais(Long userId) {
-        UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(userId);
-        if (credenciais == null) {
-            // Criar credenciais se não existirem (para usuários criados antes da implementação)
-            User user = findById(userId);
-            if (user.getUsername() != null) {
-                credenciais = new UserPlainPassword();
-                credenciais.setUserId(userId);
-                credenciais.setUsername(user.getUsername());
-                // Gerar nova senha aleatória
-                String newPassword = generatePassword();
-                credenciais.setPlainPassword(newPassword);
-                // Atualizar a senha hashada do usuário também
-                user.setPassword(passwordEncoder.encode(newPassword));
-                userRepository.save(user);
-                userPlainPasswordRepository.save(credenciais);
-            }
-        }
-        return credenciais;
     }
 }

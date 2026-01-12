@@ -4,13 +4,13 @@ import bjjapp.entity.Turma;
 import bjjapp.enums.DiaSemana;
 import bjjapp.enums.Modalidade;
 import bjjapp.service.TurmaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -94,4 +94,3 @@ public class TurmaController {
         }
     }
 }
-

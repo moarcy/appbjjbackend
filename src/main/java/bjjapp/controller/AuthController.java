@@ -30,7 +30,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username e password são obrigatórios");
         }
 
-        Optional<User> userOpt = userService.findByUsername(username);
+        Optional<User> userOpt = userService.findByUsernameAuth(username);
         if (userOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Usuário não encontrado");
         }
