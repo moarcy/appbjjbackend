@@ -13,9 +13,11 @@ import bjjapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,6 +31,7 @@ public class DataLoader implements CommandLineRunner {
     private final ProfessorRepository professorRepository;
     private final TurmaRepository turmaRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
@@ -151,25 +154,28 @@ public class DataLoader implements CommandLineRunner {
             log.info("5 alunos criados");
         }
 
-        // Criar usuário admin se não existir
-        if (userRepository.findByRoleAndAtivoTrue(Role.ADMIN).isEmpty()) {
+        // Criar ou reativar usuário admin
+        Optional<User> adminExistente = userRepository.findByUsername("admin");
+        if (adminExistente.isPresent()) {
+            User admin = adminExistente.get();
+            if (!admin.isAtivo()) {
+                admin.setAtivo(true);
+                userRepository.save(admin);
+                log.info("Usuário admin reativado");
+            } else {
+                log.info("Usuário admin já existe e está ativo, pulando criação");
+            }
+        } else {
             log.info("Criando usuário admin...");
-
             User admin = User.builder()
                 .nome("Administrador")
+                .username("admin")
+                .password(passwordEncoder.encode("admin"))
                 .role(Role.ADMIN)
+                .ativo(true)
                 .build();
-
-            // O UserService vai gerar username e password automaticamente
-            // Para fins de demonstração, vamos definir manualmente
-            admin.setUsername("admin");
-            admin.setPassword("$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"); // senha: password
-
             userRepository.save(admin);
-
-            log.info("Usuário admin criado:");
-            log.info("Username: admin");
-            log.info("Password: password");
+            log.info("Usuário admin criado com username: admin e senha: admin");
         }
 
         log.info("Dados iniciais verificados!");
