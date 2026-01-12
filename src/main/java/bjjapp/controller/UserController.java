@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br"})
 public class UserController {
 
     private final UserService userService;

@@ -16,6 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br"})
 public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
