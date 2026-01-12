@@ -2,6 +2,7 @@ package bjjapp.service;
 
 import bjjapp.entity.Professor;
 import bjjapp.enums.Faixa;
+import bjjapp.enums.TipoAlteracao;
 import bjjapp.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,11 +55,12 @@ public class ProfessorService {
 
     public void delete(Long id) {
         Professor professor = findById(id);
-        historicoService.registrarHistorico(
-            null, // Não existe User para Professor, então pode ser null ou adaptar o método
-            TipoAlteracao.DESATIVACAO.name(),
-            "Professor desativado"
-        );
+        // TODO: Implement historicoService.registrarHistorico for Professor if needed
+        // historicoService.registrarHistorico(
+        //     null, // Não existe User para Professor, então pode ser null ou adaptar o método
+        //     TipoAlteracao.DESATIVACAO.name(),
+        //     "Professor desativado"
+        // );
         professor.setAtivo(false);
         professorRepository.save(professor);
     }
