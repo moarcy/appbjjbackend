@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +42,7 @@ public class SecurityConfig {
                 .requestMatchers("/users/save").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
+                .requestMatchers(HttpMethod.PUT, "/users/deactivate/**").hasRole("ADMIN")
                 .requestMatchers("/users/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
