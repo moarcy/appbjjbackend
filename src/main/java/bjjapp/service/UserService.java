@@ -150,9 +150,9 @@ public class UserService {
 
     public void delete(Long id) {
         User user = findById(id);
+        historicoService.registrarHistorico(user, "DESATIVACAO", "Usuário desativado");
         user.setAtivo(false);
         userRepository.save(user);
-        historicoService.registrarHistorico(user, "DESATIVACAO", "Usuário desativado");
     }
 
     public Map<String, Object> getStatus(Long id) {
