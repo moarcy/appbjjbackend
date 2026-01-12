@@ -39,7 +39,7 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<Turma> findAll() {
-        return turmaRepository.findByAtivaTrue();
+        return turmaRepository.findByAtivoTrue();
     }
 
     @Transactional(readOnly = true)
@@ -50,12 +50,12 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<Turma> findByModalidade(Modalidade modalidade) {
-        return turmaRepository.findByModalidadeAndAtivaTrue(modalidade);
+        return turmaRepository.findByModalidadeAndAtivoTrue(modalidade);
     }
 
     @Transactional(readOnly = true)
     public List<Turma> findAtivas() {
-        return turmaRepository.findByAtivaTrue();
+        return turmaRepository.findByAtivoTrue();
     }
 
     public Turma update(Long id, Turma turmaAtualizada, Set<DiaSemana> dias) {
@@ -63,7 +63,7 @@ public class TurmaService {
         turma.setNome(turmaAtualizada.getNome());
         turma.setModalidade(turmaAtualizada.getModalidade());
         turma.setHorario(turmaAtualizada.getHorario());
-        turma.setAtiva(turmaAtualizada.getAtiva());
+        turma.setAtivo(turmaAtualizada.isAtivo());
 
         if (dias != null) {
             turma.getDias().clear();
@@ -75,19 +75,19 @@ public class TurmaService {
 
     public Turma ativar(Long id) {
         Turma turma = findById(id);
-        turma.setAtiva(true);
+        turma.setAtivo(true);
         return turmaRepository.save(turma);
     }
 
     public Turma desativar(Long id) {
         Turma turma = findById(id);
-        turma.setAtiva(false);
+        turma.setAtivo(false);
         return turmaRepository.save(turma);
     }
 
     public void delete(Long id) {
         Turma turma = findById(id);
-        turma.setAtiva(false);
+        turma.setAtivo(false);
         turmaRepository.save(turma);
     }
 }

@@ -47,10 +47,6 @@ public class Turma {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean ativa = true;
-
-    @Column(nullable = false)
-    @Builder.Default
     private boolean ativo = true;
 
     @ManyToMany(mappedBy = "turmas", fetch = FetchType.EAGER)

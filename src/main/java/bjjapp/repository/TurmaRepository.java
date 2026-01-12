@@ -14,11 +14,11 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
 
     List<Turma> findByModalidade(Modalidade modalidade);
 
-    List<Turma> findByAtiva(Boolean ativa);
+    List<Turma> findByAtivo(Boolean ativo);
 
     Optional<Turma> findByModalidadeAndHorario(Modalidade modalidade, LocalTime horario);
 
-    List<Turma> findByAtivaTrue();
+    List<Turma> findByAtivoTrue();
 
-    List<Turma> findByModalidadeAndAtivaTrue(Modalidade modalidade);
+    List<Turma> findByModalidadeAndAtivoTrue(Modalidade modalidade);
 }

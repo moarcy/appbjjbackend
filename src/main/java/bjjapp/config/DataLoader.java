@@ -70,7 +70,7 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Turma Gi Manhã")
                 .modalidade(Modalidade.GI)
                 .horario(LocalTime.of(7, 0))
-                .ativa(true)
+                .ativo(true)
                 .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
                 .build());
 
@@ -78,7 +78,7 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Turma Gi Noite")
                 .modalidade(Modalidade.GI)
                 .horario(LocalTime.of(19, 0))
-                .ativa(true)
+                .ativo(true)
                 .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
                 .build());
 
@@ -86,7 +86,7 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Turma No-Gi")
                 .modalidade(Modalidade.NO_GI)
                 .horario(LocalTime.of(20, 0))
-                .ativa(true)
+                .ativo(true)
                 .dias(Set.of(DiaSemana.TERCA, DiaSemana.QUINTA))
                 .build());
 
@@ -94,7 +94,7 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Turma Kids")
                 .modalidade(Modalidade.JIU_JITSU_KIDS)
                 .horario(LocalTime.of(17, 0))
-                .ativa(true)
+                .ativo(true)
                 .dias(Set.of(DiaSemana.SABADO))
                 .build());
 
