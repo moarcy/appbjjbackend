@@ -92,7 +92,7 @@ public class DataLoader implements CommandLineRunner {
 
             turmaRepository.save(Turma.builder()
                 .nome("Turma Kids")
-                .modalidade(Modalidade.JIU_JITSU_KIDS)
+                .modalidade(Modalidade.KIDS)
                 .horario(LocalTime.of(17, 0))
                 .ativo(true)
                 .dias(Set.of(DiaSemana.SABADO))
