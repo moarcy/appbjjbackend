@@ -15,5 +15,12 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     List<Professor> findByFaixa(Faixa faixa);
 
     List<Professor> findByFaixaAndGrauGreaterThanEqual(Faixa faixa, Integer grau);
-}
 
+    List<Professor> findAllByAtivoTrue();
+
+    List<Professor> findByNomeContainingIgnoreCaseAndAtivoTrue(String nome);
+
+    List<Professor> findByFaixaAndAtivoTrue(Faixa faixa);
+
+    List<Professor> findByFaixaAndGrauGreaterThanEqualAndAtivoTrue(Faixa faixa, Integer grau);
+}

@@ -14,16 +14,18 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    List<User> findByNomeContainingIgnoreCase(String nome);
+    List<User> findAllByAtivoTrue();
 
-    List<User> findByFaixa(Faixa faixa);
+    List<User> findByNomeContainingIgnoreCaseAndAtivoTrue(String nome);
 
-    List<User> findByFaixaAndGrau(Faixa faixa, Integer grau);
+    List<User> findByFaixaAndAtivoTrue(Faixa faixa);
 
-    @Query("SELECT u FROM User u JOIN u.turmas t WHERE t.id = :turmaId")
-    List<User> findByTurmaId(@Param("turmaId") Long turmaId);
+    List<User> findByFaixaAndGrauAndAtivoTrue(Faixa faixa, Integer grau);
 
-    List<User> findByRole(Role role);
+    @Query("SELECT u FROM User u JOIN u.turmas t WHERE t.id = :turmaId AND u.ativo = true")
+    List<User> findByTurmaIdAndAtivoTrue(@Param("turmaId") Long turmaId);
+
+    List<User> findByRoleAndAtivoTrue(Role role);
 
     Optional<User> findByUsername(String username);
 

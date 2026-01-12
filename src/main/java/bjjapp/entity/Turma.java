@@ -49,8 +49,16 @@ public class Turma {
     @Builder.Default
     private Boolean ativa = true;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean ativo = true;
+
     @ManyToMany(mappedBy = "turmas", fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"turmas", "chamadas"})
     @Builder.Default
     private Set<User> alunos = new HashSet<>();
+
+    @NotNull(message = "Nome é obrigatório")
+    @Column(nullable = false)
+    private String nome;
 }

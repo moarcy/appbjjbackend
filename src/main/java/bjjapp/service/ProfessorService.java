@@ -23,7 +23,7 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public List<Professor> findAll() {
-        return professorRepository.findAll();
+        return professorRepository.findAllByAtivoTrue();
     }
 
     @Transactional(readOnly = true)
@@ -34,12 +34,12 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public List<Professor> findByFaixa(Faixa faixa) {
-        return professorRepository.findByFaixa(faixa);
+        return professorRepository.findByFaixaAndAtivoTrue(faixa);
     }
 
     @Transactional(readOnly = true)
     public List<Professor> findByNome(String nome) {
-        return professorRepository.findByNomeContainingIgnoreCase(nome);
+        return professorRepository.findByNomeContainingIgnoreCaseAndAtivoTrue(nome);
     }
 
     public Professor update(Long id, Professor professorAtualizado) {
@@ -52,10 +52,9 @@ public class ProfessorService {
     }
 
     public void delete(Long id) {
-        if (!professorRepository.existsById(id)) {
-            throw new IllegalArgumentException("Professor não encontrado: " + id);
-        }
-        professorRepository.deleteById(id);
+        Professor professor = findById(id);
+        professor.setAtivo(false);
+        professorRepository.save(professor);
     }
 
     private void validarGrau(Integer grau) {
@@ -64,4 +63,3 @@ public class ProfessorService {
         }
     }
 }
-

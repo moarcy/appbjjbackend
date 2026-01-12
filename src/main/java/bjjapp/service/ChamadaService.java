@@ -49,7 +49,7 @@ public class ChamadaService {
 
     @Transactional(readOnly = true)
     public List<Chamada> findAll() {
-        return chamadaRepository.findAll();
+        return chamadaRepository.findAllByAtivoTrue();
     }
 
     @Transactional(readOnly = true)
@@ -60,22 +60,22 @@ public class ChamadaService {
 
     @Transactional(readOnly = true)
     public List<Chamada> findAbertas() {
-        return chamadaRepository.findByFinalizadaFalse();
+        return chamadaRepository.findByFinalizadaFalseAndAtivoTrue();
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByTurmaId(Long turmaId) {
-        return chamadaRepository.findByTurmaId(turmaId);
+        return chamadaRepository.findByTurmaIdAndAtivoTrue(turmaId);
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByAlunoId(Long alunoId) {
-        return chamadaRepository.findByAlunoPresente(alunoId);
+        return chamadaRepository.findByAlunoPresenteAndAtivoTrue(alunoId);
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByAlunoIdAndPeriodo(Long alunoId, LocalDateTime inicio, LocalDateTime fim) {
-        return chamadaRepository.findByAlunoPresenteAndPeriodo(alunoId, inicio, fim);
+        return chamadaRepository.findByAlunoPresenteAndPeriodoAndAtivoTrue(alunoId, inicio, fim);
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +89,7 @@ public class ChamadaService {
             .toList();
 
         // Buscar todas as chamadas das turmas no período
-        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodo(turmasIds, inicio, fim);
+        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
 
         // Separar presenças e ausências
         List<Chamada> presencas = new java.util.ArrayList<>();
@@ -185,16 +185,17 @@ public class ChamadaService {
         if (chamada.getFinalizada()) {
             throw new IllegalStateException("Não é possível deletar chamada finalizada");
         }
-        chamadaRepository.deleteById(id);
+        chamada.setAtivo(false);
+        chamadaRepository.save(chamada);
     }
 
     @Transactional(readOnly = true)
     public Long countPresencas(Long alunoId) {
-        return chamadaRepository.countPresencasByAlunoId(alunoId);
+        return chamadaRepository.countPresencasByAlunoIdAndAtivoTrue(alunoId);
     }
 
     @Transactional(readOnly = true)
     public Long countPresencasDesde(Long alunoId, LocalDateTime desde) {
-        return chamadaRepository.countPresencasDesde(alunoId, desde);
+        return chamadaRepository.countPresencasDesdeAndAtivoTrue(alunoId, desde);
     }
 }

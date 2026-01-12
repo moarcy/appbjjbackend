@@ -19,5 +19,6 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
     Optional<Turma> findByModalidadeAndHorario(Modalidade modalidade, LocalTime horario);
 
     List<Turma> findByAtivaTrue();
-}
 
+    List<Turma> findByModalidadeAndAtivaTrue(Modalidade modalidade);
+}

@@ -39,7 +39,7 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<Turma> findAll() {
-        return turmaRepository.findAll();
+        return turmaRepository.findByAtivaTrue();
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +50,7 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<Turma> findByModalidade(Modalidade modalidade) {
-        return turmaRepository.findByModalidade(modalidade);
+        return turmaRepository.findByModalidadeAndAtivaTrue(modalidade);
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +60,7 @@ public class TurmaService {
 
     public Turma update(Long id, Turma turmaAtualizada, Set<DiaSemana> dias) {
         Turma turma = findById(id);
+        turma.setNome(turmaAtualizada.getNome());
         turma.setModalidade(turmaAtualizada.getModalidade());
         turma.setHorario(turmaAtualizada.getHorario());
         turma.setAtiva(turmaAtualizada.getAtiva());
@@ -85,10 +86,8 @@ public class TurmaService {
     }
 
     public void delete(Long id) {
-        if (!turmaRepository.existsById(id)) {
-            throw new IllegalArgumentException("Turma não encontrada: " + id);
-        }
-        turmaRepository.deleteById(id);
+        Turma turma = findById(id);
+        turma.setAtiva(false);
+        turmaRepository.save(turma);
     }
 }
-

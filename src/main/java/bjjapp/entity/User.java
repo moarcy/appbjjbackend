@@ -95,6 +95,10 @@ public class User {
     @Builder.Default
     private Set<Integer> criteriosConcluidos = new HashSet<>();
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean ativo = true;
+
     // Métodos de negócio
 
     /**

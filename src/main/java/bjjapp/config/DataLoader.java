@@ -152,7 +152,7 @@ public class DataLoader implements CommandLineRunner {
         }
 
         // Criar usuário admin se não existir
-        if (userRepository.findByRole(Role.ADMIN).isEmpty()) {
+        if (userRepository.findByRoleAndAtivoTrue(Role.ADMIN).isEmpty()) {
             log.info("Criando usuário admin...");
 
             User admin = User.builder()

@@ -38,5 +38,8 @@ public class Professor {
     @Column(nullable = false)
     @Builder.Default
     private Integer grau = 0;
-}
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean ativo = true;
+}

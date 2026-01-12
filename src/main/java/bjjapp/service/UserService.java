@@ -87,7 +87,7 @@ public class UserService {
     }
 
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findAllByAtivoTrue();
     }
 
     public User findById(Long id) {
@@ -96,19 +96,19 @@ public class UserService {
     }
 
     public List<User> findByNome(String nome) {
-        return userRepository.findByNomeContainingIgnoreCase(nome);
+        return userRepository.findByNomeContainingIgnoreCaseAndAtivoTrue(nome);
     }
 
     public List<User> findByFaixa(Faixa faixa) {
-        return userRepository.findByFaixa(faixa);
+        return userRepository.findByFaixaAndAtivoTrue(faixa);
     }
 
     public List<User> findByTurmaId(Long turmaId) {
-        return userRepository.findByTurmaId(turmaId);
+        return userRepository.findByTurmaIdAndAtivoTrue(turmaId);
     }
 
     public List<User> findAptosParaGraduacao() {
-        return userRepository.findAll().stream()
+        return userRepository.findAllByAtivoTrue().stream()
             .filter(User::isAptoParaGraduacao)
             .collect(Collectors.toList());
     }
@@ -145,10 +145,11 @@ public class UserService {
         historicoService.registrarHistorico(user, "TURMA", "Turmas atualizadas");
     }
 
-    public User delete(Long id) {
+    public void delete(Long id) {
         User user = findById(id);
-        userRepository.delete(user);
-        return user;
+        user.setAtivo(false);
+        userRepository.save(user);
+        historicoService.registrarHistorico(user, "EXCLUSAO", "Usuário excluído");
     }
 
     public Map<String, Object> getStatus(Long id) {
@@ -196,7 +197,7 @@ public class UserService {
     }
 
     public Map<String, Long> getEstatisticasFaixas() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAllByAtivoTrue();
         return users.stream()
             .collect(Collectors.groupingBy(
                 user -> user.getFaixa().name(),

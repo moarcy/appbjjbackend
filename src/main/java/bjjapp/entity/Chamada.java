@@ -42,6 +42,10 @@ public class Chamada {
     @Builder.Default
     private Boolean finalizada = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean ativo = true;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "chamada_alunos",
