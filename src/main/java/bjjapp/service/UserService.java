@@ -152,7 +152,7 @@ public class UserService {
         User user = findById(id);
         user.setAtivo(false);
         userRepository.save(user);
-        historicoService.registrarHistorico(user, "EXCLUSAO", "Usuário excluído");
+        historicoService.registrarHistorico(user, "DESATIVACAO", "Usuário desativado");
     }
 
     public Map<String, Object> getStatus(Long id) {

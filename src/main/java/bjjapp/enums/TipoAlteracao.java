@@ -10,7 +10,7 @@ public enum TipoAlteracao {
     GRAU("Alteração de grau"),
     FAIXA("Troca de faixa"),
     TURMA("Alteração de turma"),
-    DESATIVACAO("Desativação");
+    DESATIVACAO("Desativação"); // Substitui EXCLUSAO
 
     private final String descricao;
 
