@@ -57,11 +57,11 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @PutMapping("/deactivate/{id}")
+    public ResponseEntity<?> deactivate(@PathVariable Long id) {
         try {
             userService.delete(id);
-            return ResponseEntity.ok("Usuário deletado com sucesso");
+            return ResponseEntity.ok("Usuário desativado com sucesso");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

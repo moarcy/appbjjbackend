@@ -56,15 +56,4 @@ public class ProfessorController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        try {
-            professorService.delete(id);
-            return ResponseEntity.ok("Professor deletado com sucesso");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
 }
-

@@ -83,14 +83,4 @@ public class TurmaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-
-    @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        try {
-            turmaService.delete(id);
-            return ResponseEntity.ok("Turma deletada com sucesso");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
 }
