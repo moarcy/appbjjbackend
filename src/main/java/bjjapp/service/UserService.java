@@ -6,6 +6,7 @@ import bjjapp.entity.Turma;
 import bjjapp.entity.UserPlainPassword;
 import bjjapp.enums.Faixa;
 import bjjapp.enums.Role;
+import bjjapp.enums.TipoAlteracao;
 import bjjapp.repository.UserRepository;
 import bjjapp.repository.TurmaRepository;
 import bjjapp.repository.UserPlainPasswordRepository;
@@ -51,7 +52,7 @@ public class UserService {
         }
 
         User saved = userRepository.save(user);
-        historicoService.registrarHistorico(saved, "CADASTRO", "Usuário cadastrado");
+        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, "Usuário cadastrado");
         return saved;
     }
 
@@ -132,7 +133,7 @@ public class UserService {
         existing.setCriteriosConcluidos(user.getCriteriosConcluidos());
 
         User updated = userRepository.save(existing);
-        historicoService.registrarHistorico(updated, "ATUALIZACAO", "Dados atualizados");
+        historicoService.registrarHistorico(updated, TipoAlteracao.ATUALIZACAO, "Dados atualizados");
         return updated;
     }
 
@@ -145,12 +146,12 @@ public class UserService {
             .collect(Collectors.toSet());
         user.setTurmas(turmas);
         userRepository.save(user);
-        historicoService.registrarHistorico(user, "TURMA", "Turmas atualizadas");
+        historicoService.registrarHistorico(user, TipoAlteracao.TURMA, "Turmas atualizadas");
     }
 
     public void delete(Long id) {
         User user = findById(id);
-        historicoService.registrarHistorico(user, "DESATIVACAO", "Usuário desativado");
+        historicoService.registrarHistorico(user, TipoAlteracao.DESATIVACAO, "Usuário desativado");
         user.setAtivo(false);
         userRepository.save(user);
     }
@@ -181,7 +182,7 @@ public class UserService {
         User user = findById(id);
         user.concederGrau();
         User saved = userRepository.save(user);
-        historicoService.registrarHistorico(saved, "GRAU", "Grau concedido: " + saved.getGrau());
+        historicoService.registrarHistorico(saved, TipoAlteracao.GRAU, "Grau concedido: " + saved.getGrau());
         return saved;
     }
 
@@ -190,7 +191,7 @@ public class UserService {
         Faixa faixa = Faixa.valueOf(novaFaixa.toUpperCase());
         user.trocarFaixa(faixa);
         User saved = userRepository.save(user);
-        historicoService.registrarHistorico(saved, "FAIXA", "Faixa trocada para: " + saved.getFaixa());
+        historicoService.registrarHistorico(saved, TipoAlteracao.FAIXA, "Faixa trocada para: " + saved.getFaixa());
         return saved;
     }
 

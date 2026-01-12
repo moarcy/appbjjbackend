@@ -22,10 +22,10 @@ public class UserHistoricoService {
         return historicoRepository.save(historico);
     }
 
-    public void registrarHistorico(User user, String tipoAlteracao, String descricao) {
+    public void registrarHistorico(User user, TipoAlteracao tipoAlteracao, String descricao) {
         UserHistorico historico = UserHistorico.builder()
             .user(user)
-            .tipoAlteracao(TipoAlteracao.valueOf(tipoAlteracao))
+            .tipoAlteracao(tipoAlteracao)
             .descricao(descricao)
             .dataHoraAlteracao(LocalDateTime.now())
             .build();
