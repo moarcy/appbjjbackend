@@ -15,6 +15,7 @@ import java.util.List;
 public class ProfessorService {
 
     private final ProfessorRepository professorRepository;
+    private final UserHistoricoService historicoService;
 
     public Professor save(Professor professor) {
         validarGrau(professor.getGrau());
@@ -53,7 +54,11 @@ public class ProfessorService {
 
     public void delete(Long id) {
         Professor professor = findById(id);
-        historicoService.registrarHistorico(professor, "DESATIVACAO", "Professor desativado");
+        historicoService.registrarHistorico(
+            null, // Não existe User para Professor, então pode ser null ou adaptar o método
+            TipoAlteracao.DESATIVACAO.name(),
+            "Professor desativado"
+        );
         professor.setAtivo(false);
         professorRepository.save(professor);
     }
