@@ -5,6 +5,7 @@ import bjjapp.enums.Role;
 import bjjapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Slf4j
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000"})
 public class UserController {
 
@@ -59,6 +61,7 @@ public class UserController {
 
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<?> deactivate(@PathVariable Long id) {
+        log.info("Desativando usuário ID: {}", id);
         try {
             userService.delete(id);
             return ResponseEntity.ok("Usuário desativado com sucesso");

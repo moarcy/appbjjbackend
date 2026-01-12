@@ -10,6 +10,7 @@ import bjjapp.repository.UserRepository;
 import bjjapp.repository.TurmaRepository;
 import bjjapp.repository.UserPlainPasswordRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class UserService {
 
@@ -91,6 +93,7 @@ public class UserService {
     }
 
     public User findById(Long id) {
+        log.info("Buscando usuário por ID: {}", id);
         return userRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
     }
