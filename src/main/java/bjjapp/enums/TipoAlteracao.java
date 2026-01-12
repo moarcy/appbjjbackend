@@ -9,7 +9,8 @@ public enum TipoAlteracao {
     PRESENCA("Presença registrada"),
     GRAU("Alteração de grau"),
     FAIXA("Troca de faixa"),
-    TURMA("Alteração de turma");
+    TURMA("Alteração de turma"),
+    DESATIVACAO("Desativação");
 
     private final String descricao;
 
@@ -21,4 +22,3 @@ public enum TipoAlteracao {
         return descricao;
     }
 }
-
