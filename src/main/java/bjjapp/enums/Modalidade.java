@@ -6,8 +6,8 @@ package bjjapp.enums;
 public enum Modalidade {
     GI("Gi (Kimono)"),
     NO_GI("No-Gi (Sem Kimono)"),
-    KIDS("Jiu-Jitsu Kids"),
-    COMPETICAO("Competição");
+    JIU_JITSU_KIDS("Jiu-Jitsu Kids"),
+    JIU_JITSU_COMPETICAO("Competição");
 
     private final String descricao;
 
@@ -19,4 +19,3 @@ public enum Modalidade {
         return descricao;
     }
 }
-

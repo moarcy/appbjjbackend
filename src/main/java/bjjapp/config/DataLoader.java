@@ -67,6 +67,7 @@ public class DataLoader implements CommandLineRunner {
             log.info("Criando turmas de exemplo...");
 
             turmaRepository.save(Turma.builder()
+                .nome("Turma Gi Manhã")
                 .modalidade(Modalidade.GI)
                 .horario(LocalTime.of(7, 0))
                 .ativa(true)
@@ -74,6 +75,7 @@ public class DataLoader implements CommandLineRunner {
                 .build());
 
             turmaRepository.save(Turma.builder()
+                .nome("Turma Gi Noite")
                 .modalidade(Modalidade.GI)
                 .horario(LocalTime.of(19, 0))
                 .ativa(true)
@@ -81,6 +83,7 @@ public class DataLoader implements CommandLineRunner {
                 .build());
 
             turmaRepository.save(Turma.builder()
+                .nome("Turma No-Gi")
                 .modalidade(Modalidade.NO_GI)
                 .horario(LocalTime.of(20, 0))
                 .ativa(true)
@@ -88,7 +91,8 @@ public class DataLoader implements CommandLineRunner {
                 .build());
 
             turmaRepository.save(Turma.builder()
-                .modalidade(Modalidade.KIDS)
+                .nome("Turma Kids")
+                .modalidade(Modalidade.JIU_JITSU_KIDS)
                 .horario(LocalTime.of(17, 0))
                 .ativa(true)
                 .dias(Set.of(DiaSemana.SABADO))
