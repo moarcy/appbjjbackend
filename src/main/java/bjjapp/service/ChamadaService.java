@@ -80,18 +80,25 @@ public class ChamadaService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getPresencasEausenciasPorPeriodo(Long alunoId, LocalDateTime inicio, LocalDateTime fim) {
-        // Buscar turmas do aluno
+        // LOG: Parâmetros recebidos
+        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - alunoId: " + alunoId);
+        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - inicio: " + inicio);
+        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - fim: " + fim);
+
         User aluno = userRepository.findById(alunoId)
             .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
 
         List<Long> turmasIds = aluno.getTurmas().stream()
             .map(Turma::getId)
             .toList();
+        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - turmasIds: " + turmasIds);
 
-        // Buscar todas as chamadas das turmas no período (apenas ativas e finalizadas)
         List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
+        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - chamadas encontradas: " + todasChamadas.size());
+        for (Chamada chamada : todasChamadas) {
+            System.out.println("[DEBUG] chamadaId: " + chamada.getId() + ", dataHoraInicio: " + chamada.getDataHoraInicio() + ", finalizada: " + chamada.getFinalizada() + ", ativo: " + chamada.isAtivo());
+        }
 
-        // Separar presenças e ausências
         List<Chamada> presencas = new java.util.ArrayList<>();
         List<Chamada> ausencias = new java.util.ArrayList<>();
 
