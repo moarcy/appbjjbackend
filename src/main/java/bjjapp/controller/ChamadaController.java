@@ -71,8 +71,11 @@ public class ChamadaController {
             @RequestParam(required = false) String endDate) {
         try {
             if (startDate != null && endDate != null) {
-                LocalDateTime inicio = LocalDateTime.parse(startDate + "T00:00:00");
-                LocalDateTime fim = LocalDateTime.parse(endDate + "T23:59:59");
+                // Parse robusto das datas
+                java.time.LocalDate inicioData = java.time.LocalDate.parse(startDate);
+                java.time.LocalDate fimData = java.time.LocalDate.parse(endDate);
+                java.time.LocalDateTime inicio = inicioData.atStartOfDay();
+                java.time.LocalDateTime fim = fimData.atTime(23, 59, 59);
                 Map<String, Object> resultado = chamadaService.getPresencasEausenciasPorPeriodo(alunoId, inicio, fim);
                 return ResponseEntity.ok(Map.of(
                     "presencas", resultado.get("presencas"),
