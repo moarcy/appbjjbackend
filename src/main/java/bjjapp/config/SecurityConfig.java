@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers(HttpMethod.PUT, "/users/deactivate/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/users/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
