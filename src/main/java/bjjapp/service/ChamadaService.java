@@ -88,7 +88,7 @@ public class ChamadaService {
             .map(Turma::getId)
             .toList();
 
-        // Buscar todas as chamadas das turmas no período
+        // Buscar todas as chamadas das turmas no período (apenas ativas e finalizadas)
         List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
 
         // Separar presenças e ausências
