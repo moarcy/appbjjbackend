@@ -141,4 +141,18 @@ public class UserController {
         User user = userService.trocarFaixa(id, novaFaixa);
         return ResponseEntity.ok(user);
     }
+
+    @GetMapping("/campos-cadastro")
+    public ResponseEntity<?> getCamposCadastro(@RequestParam Integer idade) {
+        boolean menorDeIdade = idade != null && idade < 18;
+        Map<String, Object> campos = new java.util.HashMap<>();
+        campos.put("menorDeIdade", menorDeIdade);
+        campos.put("camposObrigatorios", menorDeIdade ?
+            Arrays.asList("nome", "dataNascimento", "nomeResponsavel", "whatsappResponsavel", "dataInicioPratica") :
+            Arrays.asList("nome", "dataNascimento", "telefoneContato", "dataInicioPratica"));
+        campos.put("camposOpcionais", menorDeIdade ?
+            Arrays.asList("telefoneContato", "dataUltimaGraduacao") :
+            Arrays.asList("nomeResponsavel", "whatsappResponsavel", "dataUltimaGraduacao"));
+        return ResponseEntity.ok(campos);
+    }
 }
