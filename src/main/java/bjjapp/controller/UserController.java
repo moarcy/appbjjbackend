@@ -1,24 +1,30 @@
 package bjjapp.controller;
 
 import bjjapp.entity.User;
+import bjjapp.entity.UserHistorico;
+import bjjapp.entity.Turma;
+import bjjapp.enums.Faixa;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
 import bjjapp.service.RequisitosGraduacaoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashSet;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br"})
 public class UserController {
 
@@ -65,7 +71,6 @@ public class UserController {
 
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<?> deactivate(@PathVariable Long id) {
-        log.info("Desativando usuário ID: {}", id);
         try {
             userService.delete(id);
             return ResponseEntity.ok("Usuário desativado com sucesso");
@@ -105,13 +110,13 @@ public class UserController {
 
     @PutMapping("/marcar-criterios/{id}")
     public ResponseEntity<User> marcarCriterios(@PathVariable Long id, @RequestBody List<Integer> criterios) {
-        User user = userService.updateCriterios(id, new HashSet<>(criterios));
+        User user = userService.updateCriterios(id, Set.copyOf(criterios));
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/graduacao/{id}")
     public ResponseEntity<User> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody List<Integer> criterios) {
-        User user = userService.updateCriterios(id, new HashSet<>(criterios));
+        User user = userService.updateCriterios(id, Set.copyOf(criterios));
         return ResponseEntity.ok(user);
     }
 

@@ -240,4 +240,25 @@ public class UserService {
             .build();
         return save(professor);
     }
+
+    public UserPlainPassword getCredenciais(Long userId) {
+        UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(userId);
+        if (credenciais == null) {
+            // Criar credenciais se não existirem (para usuários criados antes da implementação)
+            User user = findById(userId);
+            if (user.getUsername() != null) {
+                credenciais = new UserPlainPassword();
+                credenciais.setUserId(userId);
+                credenciais.setUsername(user.getUsername());
+                // Gerar nova senha aleatória
+                String newPassword = generatePassword();
+                credenciais.setPlainPassword(newPassword);
+                // Atualizar a senha hashada do usuário também
+                user.setPassword(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                userPlainPasswordRepository.save(credenciais);
+            }
+        }
+        return credenciais;
+    }
 }

@@ -159,7 +159,7 @@ public class ChamadaController {
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
-            chamadaService.delete(id);
+            chamadaService.delete(id); // Soft delete: apenas marca como inativo
             return ResponseEntity.ok("Chamada deletada com sucesso");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
