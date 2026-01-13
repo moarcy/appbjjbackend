@@ -3,6 +3,7 @@ package bjjapp.controller;
 import bjjapp.entity.User;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
+import bjjapp.service.RequisitosGraduacaoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -21,6 +23,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final RequisitosGraduacaoService requisitosGraduacaoService;
 
     @PostMapping("/save")
     public ResponseEntity<User> save(@Valid @RequestBody User user) {
@@ -91,14 +94,13 @@ public class UserController {
 
     @GetMapping("/{faixa}/requisitos/{id}")
     public ResponseEntity<List<String>> getRequisitosPorFaixa(@PathVariable String faixa, @PathVariable Long id) {
-        User user = userService.findById(id);
-        return ResponseEntity.ok(userService.requisitosService.getRequisitosPorFaixa(faixa));
+        return ResponseEntity.ok(requisitosGraduacaoService.getRequisitosPorFaixa(faixa));
     }
 
     @GetMapping("/graduacao/{id}")
     public ResponseEntity<List<String>> getChecklistGraduacao(@PathVariable Long id) {
         User user = userService.findById(id);
-        return ResponseEntity.ok(userService.requisitosService.getRequisitosPorFaixa(user.getFaixa()));
+        return ResponseEntity.ok(requisitosGraduacaoService.getRequisitosPorFaixa(user.getFaixa()));
     }
 
     @PutMapping("/marcar-criterios/{id}")
@@ -110,6 +112,28 @@ public class UserController {
     @PutMapping("/graduacao/{id}")
     public ResponseEntity<User> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody List<Integer> criterios) {
         User user = userService.updateCriterios(id, new HashSet<>(criterios));
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/conceder-grau/{id}")
+    public ResponseEntity<User> concederGrau(@PathVariable Long id) {
+        User user = userService.concederGrau(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/credenciais/{id}")
+    public ResponseEntity<Map<String, String>> getCredenciais(@PathVariable Long id) {
+        User user = userService.findById(id);
+        Map<String, String> credenciais = Map.of(
+            "username", user.getUsername() != null ? user.getUsername() : "",
+            "senha", "(não disponível por segurança)"
+        );
+        return ResponseEntity.ok(credenciais);
+    }
+
+    @PutMapping("/trocar-faixa/{id}")
+    public ResponseEntity<User> trocarFaixa(@PathVariable Long id, @RequestBody String novaFaixa) {
+        User user = userService.trocarFaixa(id, novaFaixa);
         return ResponseEntity.ok(user);
     }
 }
