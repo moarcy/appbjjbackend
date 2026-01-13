@@ -79,25 +79,27 @@ public class UserService {
     }
 
     public User save(User user, Set<Long> turmasIds) {
+        // 1. Salva o usuário sem turmas para garantir o ID
+        Set<Turma> turmas = new HashSet<>();
         if (turmasIds != null && !turmasIds.isEmpty()) {
-            Set<Turma> turmas = turmasIds.stream()
+            turmas = turmasIds.stream()
                 .map(turmaRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toSet());
-            user.setTurmas(turmas);
         }
-        User saved = save(user);
-        // Garante bidirecionalidade: adiciona o aluno salvo em cada turma
-        if (turmasIds != null && !turmasIds.isEmpty()) {
-            for (Turma turma : saved.getTurmas()) {
-                if (!turma.getAlunos().contains(saved)) {
-                    turma.getAlunos().add(saved);
-                    turmaRepository.save(turma);
-                }
-            }
+        user.setTurmas(new HashSet<>()); // Temporariamente vazio
+        User saved = save(user); // Garante que o usuário tenha ID
+
+        // 2. Associa o usuário às turmas e vice-versa
+        for (Turma turma : turmas) {
+            turma.getAlunos().add(saved);
+            turmaRepository.save(turma);
         }
-        return saved;
+        saved.setTurmas(turmas);
+
+        // 3. Salva novamente o usuário com as turmas associadas
+        return userRepository.save(saved);
     }
 
     public List<User> findAll() {
