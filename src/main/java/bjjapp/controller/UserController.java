@@ -153,15 +153,25 @@ public class UserController {
     }
 
     @PutMapping("/marcar-criterios/{id}")
-    public ResponseEntity<User> marcarCriterios(@PathVariable Long id, @RequestBody List<Integer> criterios) {
-        User user = userService.updateCriterios(id, Set.copyOf(criterios));
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> marcarCriterios(@PathVariable Long id, @RequestBody boolean[] criteriosMarcados) {
+        return atualizarChecklistGraduacao(id, criteriosMarcados);
     }
 
     @PutMapping("/graduacao/{id}")
-    public ResponseEntity<User> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody List<Integer> criterios) {
-        User user = userService.updateCriterios(id, Set.copyOf(criterios));
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody boolean[] criteriosMarcados) {
+        // Converter array de boolean para Set de índices
+        Set<Integer> novosIndices = new java.util.HashSet<>();
+        for (int i = 0; i < criteriosMarcados.length; i++) {
+            if (criteriosMarcados[i]) {
+                novosIndices.add(i);
+            }
+        }
+        User user = userService.updateCriterios(id, novosIndices);
+        return ResponseEntity.ok(Map.of(
+            "mensagem", "Critérios atualizados com sucesso",
+            "totalConcluidos", novosIndices.size(),
+            "criteriosConcluidos", novosIndices
+        ));
     }
 
     @PostMapping("/conceder-grau/{id}")
