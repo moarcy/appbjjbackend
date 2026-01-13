@@ -86,6 +86,11 @@ public class UserService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
             user.setTurmas(turmas);
+            // Atualiza o lado da turma (bidirecional)
+            for (Turma turma : turmas) {
+                turma.getAlunos().add(user);
+                turmaRepository.save(turma); // Garante persistência do lado da turma
+            }
         }
         return save(user);
     }
