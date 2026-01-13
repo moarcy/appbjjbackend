@@ -103,9 +103,53 @@ public class UserController {
     }
 
     @GetMapping("/graduacao/{id}")
-    public ResponseEntity<List<String>> getChecklistGraduacao(@PathVariable Long id) {
-        User user = userService.findById(id);
-        return ResponseEntity.ok(requisitosGraduacaoService.getRequisitosPorFaixa(user.getFaixa()));
+    public ResponseEntity<?> getCriteriosGraduacao(
+            @PathVariable Long id,
+            @RequestParam(required = false) String faixa) {
+        try {
+            User user = userService.findById(id);
+            // Usar método que retorna requisitos da PRÓXIMA faixa considerando idade
+            List<String> requisitos;
+            Faixa faixaRequisitos;
+            if (faixa != null) {
+                faixaRequisitos = Faixa.valueOf(faixa.toUpperCase());
+                requisitos = requisitosGraduacaoService.getRequisitosPorFaixa(faixaRequisitos);
+            } else {
+                faixaRequisitos = requisitosGraduacaoService.getProximaFaixa(user.getFaixa(), user.getIdade());
+                requisitos = requisitosGraduacaoService.getRequisitosParaProximaFaixa(user.getFaixa(), user.getIdade());
+            }
+            Set<Integer> concluidos = user.getCriteriosConcluidos() != null
+                ? user.getCriteriosConcluidos()
+                : new java.util.HashSet<>();
+            boolean[] criteriosMarcados = new boolean[requisitos.size()];
+            int totalConcluidos = 0;
+            for (int i = 0; i < requisitos.size(); i++) {
+                criteriosMarcados[i] = concluidos.contains(i);
+                if (criteriosMarcados[i]) totalConcluidos++;
+            }
+            boolean prontoParaProximaFaixa = requisitosGraduacaoService.isProntoParaProximaFaixa(
+                user.getFaixa(),
+                user.getGrau(),
+                totalConcluidos,
+                requisitos.size(),
+                user.getIdade()
+            );
+            Integer idadeMinimaProximaFaixa = faixaRequisitos != null
+                ? requisitosGraduacaoService.getIdadeMinima(faixaRequisitos) : null;
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("requisitos", requisitos);
+            response.put("criteriosMarcados", criteriosMarcados);
+            response.put("faixaAtual", user.getFaixa().name());
+            response.put("faixaRequisitos", faixaRequisitos != null ? faixaRequisitos.name() : null);
+            response.put("prontoParaProximaFaixa", prontoParaProximaFaixa);
+            response.put("idadeMinimaProximaFaixa", idadeMinimaProximaFaixa);
+            response.put("grauAtual", user.getGrau());
+            response.put("totalCriterios", requisitos.size());
+            response.put("totalConcluidos", totalConcluidos);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
     }
 
     @PutMapping("/marcar-criterios/{id}")
