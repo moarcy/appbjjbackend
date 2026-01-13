@@ -2,6 +2,7 @@ package bjjapp.service;
 
 import bjjapp.entity.UserHistorico;
 import bjjapp.entity.User;
+import bjjapp.entity.Professor;
 import bjjapp.enums.TipoAlteracao;
 import bjjapp.repository.UserHistoricoRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,15 @@ public class UserHistoricoService {
             .user(user)
             .tipoAlteracao(tipoAlteracao)
             .descricao(descricao)
+            .dataHoraAlteracao(LocalDateTime.now())
+            .build();
+        save(historico);
+    }
+
+    public void registrarHistoricoProfessor(Professor professor, TipoAlteracao tipoAlteracao, String descricao) {
+        UserHistorico historico = UserHistorico.builder()
+            .descricao(descricao)
+            .tipoAlteracao(tipoAlteracao)
             .dataHoraAlteracao(LocalDateTime.now())
             .build();
         save(historico);
