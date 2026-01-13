@@ -267,24 +267,40 @@ public class UserService {
         if (user.getNome() == null || user.getNome().isBlank()) {
             throw new IllegalArgumentException("Nome é obrigatório");
         }
-        String username = null;
-        String rawPassword = null;
-        if (user.getId() == null && user.getUsername() == null) {
-            username = generateUsername(user.getNome());
+        String username;
+        String rawPassword;
+        boolean novoUsuario = user.getId() == null;
+        if (novoUsuario) {
+            if (user.getUsername() == null || user.getUsername().isBlank()) {
+                username = generateUsername(user.getNome());
+                user.setUsername(username);
+            } else {
+                username = user.getUsername();
+            }
             rawPassword = generatePassword();
-            user.setUsername(username);
             user.setPassword(passwordEncoder.encode(rawPassword));
+        } else {
+            username = user.getUsername();
+            // Gerar senha para usuário existente se não houver credencial
+            UserPlainPassword credenciaisExistente = userPlainPasswordRepository.findByUserId(user.getId());
+            if (credenciaisExistente == null) {
+                rawPassword = generatePassword();
+                user.setPassword(passwordEncoder.encode(rawPassword));
+            } else {
+                rawPassword = credenciaisExistente.getPlainPassword();
+            }
         }
         User saved = userRepository.save(user);
-        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, "Usuário cadastrado");
+        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, novoUsuario ? "Usuário cadastrado" : "Credenciais geradas para usuário existente");
         // Salvar senha em texto claro
-        if (username != null && rawPassword != null) {
-            UserPlainPassword credenciais = new UserPlainPassword();
+        UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(saved.getId());
+        if (credenciais == null && rawPassword != null) {
+            credenciais = new UserPlainPassword();
             credenciais.setUserId(saved.getId());
             credenciais.setUsername(username);
             credenciais.setPlainPassword(rawPassword);
             userPlainPasswordRepository.save(credenciais);
         }
-        return new bjjapp.controller.UserCreationResponse(saved, user.getUsername(), rawPassword);
+        return new bjjapp.controller.UserCreationResponse(saved, username, rawPassword);
     }
 }
