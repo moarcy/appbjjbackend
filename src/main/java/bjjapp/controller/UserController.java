@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 
 @RestController
@@ -86,5 +87,29 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/{faixa}/requisitos/{id}")
+    public ResponseEntity<List<String>> getRequisitosPorFaixa(@PathVariable String faixa, @PathVariable Long id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(userService.requisitosService.getRequisitosPorFaixa(faixa));
+    }
+
+    @GetMapping("/graduacao/{id}")
+    public ResponseEntity<List<String>> getChecklistGraduacao(@PathVariable Long id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(userService.requisitosService.getRequisitosPorFaixa(user.getFaixa()));
+    }
+
+    @PutMapping("/marcar-criterios/{id}")
+    public ResponseEntity<User> marcarCriterios(@PathVariable Long id, @RequestBody List<Integer> criterios) {
+        User user = userService.updateCriterios(id, new HashSet<>(criterios));
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/graduacao/{id}")
+    public ResponseEntity<User> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody List<Integer> criterios) {
+        User user = userService.updateCriterios(id, new HashSet<>(criterios));
+        return ResponseEntity.ok(user);
     }
 }
