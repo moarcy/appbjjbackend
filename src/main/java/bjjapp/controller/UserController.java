@@ -69,4 +69,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("/status/{id}")
+    public ResponseEntity<?> getStatus(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(userService.getStatus(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/historico/{id}")
+    public ResponseEntity<?> getHistorico(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(userService.getHistorico(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

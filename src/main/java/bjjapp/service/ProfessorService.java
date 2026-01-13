@@ -55,8 +55,7 @@ public class ProfessorService {
 
     public void delete(Long id) {
         Professor professor = findById(id);
-        // Registro de histórico de desativação para Professor
-        historicoService.registrarHistorico(null, TipoAlteracao.DESATIVACAO, "Professor desativado");
+        historicoService.registrarHistorico(professor, TipoAlteracao.DESATIVACAO, "Professor desativado");
         professor.setAtivo(false);
         professorRepository.save(professor);
     }
