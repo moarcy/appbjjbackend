@@ -20,10 +20,12 @@ public class TurmaService {
     private final TurmaRepository turmaRepository;
 
     public Turma save(Turma turma, Set<DiaSemana> dias) {
-        // Verificar duplicata
+        // Verificar duplicata considerando apenas turmas ativas e ignorando a própria turma (em edição)
         turmaRepository.findByModalidadeAndHorario(turma.getModalidade(), turma.getHorario())
             .ifPresent(t -> {
-                throw new IllegalArgumentException("Já existe turma com essa modalidade e horário");
+                if (t.isAtivo() && (turma.getId() == null || !t.getId().equals(turma.getId()))) {
+                    throw new IllegalArgumentException("Já existe turma com essa modalidade e horário");
+                }
             });
 
         if (dias != null && !dias.isEmpty()) {
