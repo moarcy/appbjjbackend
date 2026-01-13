@@ -106,10 +106,14 @@ public class ChamadaController {
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR', 'ALUNO')")
     public ResponseEntity<?> getPresencasAusencias(
             @PathVariable Long alunoId,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        // Redirecionar para o endpoint existente /aluno/{alunoId}
-        return findByAluno(alunoId, startDate, endDate);
+            @RequestParam(required = false, name = "startDate") String startDate,
+            @RequestParam(required = false, name = "endDate") String endDate,
+            @RequestParam(required = false, name = "inicio") String inicio,
+            @RequestParam(required = false, name = "fim") String fim) {
+        // Prioriza startDate/endDate, mas aceita inicio/fim
+        String dataInicio = startDate != null ? startDate : inicio;
+        String dataFim = endDate != null ? endDate : fim;
+        return findByAluno(alunoId, dataInicio, dataFim);
     }
 
     @PostMapping("/{id}/presenca/{alunoId}")
