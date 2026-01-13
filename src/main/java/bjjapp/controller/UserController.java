@@ -31,9 +31,12 @@ public class UserController {
     private final UserService userService;
     private final RequisitosGraduacaoService requisitosGraduacaoService;
 
+    public record UserRequest(User user, Set<Long> turmasIds) {}
+
     @PostMapping("/save")
-    public ResponseEntity<UserCreationResponse> save(@Valid @RequestBody User user) {
-        return ResponseEntity.ok(userService.saveWithPlainPassword(user));
+    public ResponseEntity<UserCreationResponse> save(@RequestBody UserRequest request) {
+        UserCreationResponse response = userService.saveWithPlainPassword(request.user(), request.turmasIds());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/findAll")
@@ -61,12 +64,8 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody User user) {
-        try {
-            return ResponseEntity.ok(userService.update(id, user));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UserRequest request) {
+        return ResponseEntity.ok(userService.update(id, request.user(), request.turmasIds()));
     }
 
     @PutMapping("/deactivate/{id}")

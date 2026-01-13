@@ -142,8 +142,68 @@ public class UserService {
         existing.setTelefoneContato(user.getTelefoneContato());
         existing.setDataInicioPratica(user.getDataInicioPratica());
         existing.setDataUltimaGraduacao(user.getDataUltimaGraduacao());
-        existing.setTurmas(user.getTurmas());
         existing.setCriteriosConcluidos(user.getCriteriosConcluidos());
+
+        // --- Bidirecionalidade ---
+        Set<Turma> turmasAntigas = new HashSet<>(existing.getTurmas());
+        Set<Turma> turmasNovas = user.getTurmas() != null ? user.getTurmas() : new HashSet<>();
+
+        // Remover o usuário das turmas antigas que não estão mais presentes
+        for (Turma turma : turmasAntigas) {
+            if (!turmasNovas.contains(turma)) {
+                turma.getAlunos().remove(existing);
+                turmaRepository.save(turma);
+            }
+        }
+        // Adicionar o usuário às novas turmas
+        for (Turma turma : turmasNovas) {
+            turma.getAlunos().add(existing);
+            turmaRepository.save(turma);
+        }
+        existing.setTurmas(turmasNovas);
+
+        User updated = userRepository.save(existing);
+        historicoService.registrarHistorico(updated, TipoAlteracao.ATUALIZACAO, "Dados atualizados");
+        return updated;
+    }
+
+    public User update(Long id, User user, Set<Long> turmasIds) {
+        User existing = findById(id);
+        existing.setNome(user.getNome());
+        existing.setIdade(user.getIdade());
+        existing.setDataNascimento(user.getDataNascimento());
+        existing.setFaixa(user.getFaixa());
+        existing.setGrau(user.getGrau());
+        existing.setNomeResponsavel(user.getNomeResponsavel());
+        existing.setWhatsappResponsavel(user.getWhatsappResponsavel());
+        existing.setTelefoneContato(user.getTelefoneContato());
+        existing.setDataInicioPratica(user.getDataInicioPratica());
+        existing.setDataUltimaGraduacao(user.getDataUltimaGraduacao());
+        existing.setCriteriosConcluidos(user.getCriteriosConcluidos());
+
+        // --- Bidirecionalidade ---
+        Set<Turma> turmasAntigas = new HashSet<>(existing.getTurmas());
+        Set<Turma> turmasNovas = new HashSet<>();
+        if (turmasIds != null && !turmasIds.isEmpty()) {
+            turmasNovas = turmasIds.stream()
+                .map(turmaRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+        }
+        // Remover o usuário das turmas antigas que não estão mais presentes
+        for (Turma turma : turmasAntigas) {
+            if (!turmasNovas.contains(turma)) {
+                turma.getAlunos().remove(existing);
+                turmaRepository.save(turma);
+            }
+        }
+        // Adicionar o usuário às novas turmas
+        for (Turma turma : turmasNovas) {
+            turma.getAlunos().add(existing);
+            turmaRepository.save(turma);
+        }
+        existing.setTurmas(turmasNovas);
 
         User updated = userRepository.save(existing);
         historicoService.registrarHistorico(updated, TipoAlteracao.ATUALIZACAO, "Dados atualizados");
@@ -275,7 +335,7 @@ public class UserService {
         return credenciais;
     }
 
-    public UserCreationResponse saveWithPlainPassword(User user) {
+    public UserCreationResponse saveWithPlainPassword(User user, Set<Long> turmasIds) {
         if (user.getNome() == null || user.getNome().isBlank()) {
             throw new IllegalArgumentException("Nome é obrigatório");
         }
@@ -302,7 +362,8 @@ public class UserService {
                 rawPassword = credenciaisExistente.getPlainPassword();
             }
         }
-        User saved = userRepository.save(user);
+        // Salvar usuário e turmas (bidirecional)
+        User saved = save(user, turmasIds);
         historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, novoUsuario ? "Usuário cadastrado" : "Credenciais geradas para usuário existente");
         // Salvar senha em texto claro
         UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(saved.getId());
