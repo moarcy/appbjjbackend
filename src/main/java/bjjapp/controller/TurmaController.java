@@ -26,7 +26,12 @@ public class TurmaController {
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TurmaRequest request) {
         try {
-            Turma salva = turmaService.save(request.turma(), request.dias());
+            Turma turma = request.turma();
+            // Garante que novas turmas sejam criadas como ativas, a não ser que explicitamente informado
+            if (turma.getId() == null) {
+                turma.setAtivo(true);
+            }
+            Turma salva = turmaService.save(turma, request.dias());
             return ResponseEntity.ok(salva);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
