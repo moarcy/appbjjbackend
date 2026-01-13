@@ -86,13 +86,18 @@ public class UserService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
             user.setTurmas(turmas);
-            // Atualiza o lado da turma (bidirecional)
-            for (Turma turma : turmas) {
-                turma.getAlunos().add(user);
-                turmaRepository.save(turma); // Garante persistência do lado da turma
+        }
+        User saved = save(user);
+        // Garante bidirecionalidade: adiciona o aluno salvo em cada turma
+        if (turmasIds != null && !turmasIds.isEmpty()) {
+            for (Turma turma : saved.getTurmas()) {
+                if (!turma.getAlunos().contains(saved)) {
+                    turma.getAlunos().add(saved);
+                    turmaRepository.save(turma);
+                }
             }
         }
-        return save(user);
+        return saved;
     }
 
     public List<User> findAll() {
