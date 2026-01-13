@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
                 .requestMatchers("/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
+                .requestMatchers("/requisitos-graduacao/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
