@@ -261,4 +261,29 @@ public class UserService {
         }
         return credenciais;
     }
+
+    public UserCreationResponse saveWithPlainPassword(User user) {
+        if (user.getNome() == null || user.getNome().isBlank()) {
+            throw new IllegalArgumentException("Nome é obrigatório");
+        }
+        String username = null;
+        String rawPassword = null;
+        if (user.getId() == null && user.getUsername() == null) {
+            username = generateUsername(user.getNome());
+            rawPassword = generatePassword();
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(rawPassword));
+        }
+        User saved = userRepository.save(user);
+        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, "Usuário cadastrado");
+        // Salvar senha em texto claro
+        if (username != null && rawPassword != null) {
+            UserPlainPassword credenciais = new UserPlainPassword();
+            credenciais.setUserId(saved.getId());
+            credenciais.setUsername(username);
+            credenciais.setPlainPassword(rawPassword);
+            userPlainPasswordRepository.save(credenciais);
+        }
+        return new bjjapp.controller.UserCreationResponse(saved, user.getUsername(), rawPassword);
+    }
 }

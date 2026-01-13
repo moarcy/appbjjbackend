@@ -32,8 +32,8 @@ public class UserController {
     private final RequisitosGraduacaoService requisitosGraduacaoService;
 
     @PostMapping("/save")
-    public ResponseEntity<User> save(@Valid @RequestBody User user) {
-        return ResponseEntity.ok(userService.save(user));
+    public ResponseEntity<UserCreationResponse> save(@Valid @RequestBody User user) {
+        return ResponseEntity.ok(userService.saveWithPlainPassword(user));
     }
 
     @GetMapping("/findAll")
