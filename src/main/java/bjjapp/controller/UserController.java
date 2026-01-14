@@ -3,6 +3,7 @@ package bjjapp.controller;
 import bjjapp.entity.User;
 import bjjapp.entity.UserHistorico;
 import bjjapp.entity.Turma;
+import bjjapp.entity.UserPlainPassword;
 import bjjapp.enums.Faixa;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
@@ -180,12 +181,8 @@ public class UserController {
     }
 
     @GetMapping("/credenciais/{id}")
-    public ResponseEntity<Map<String, String>> getCredenciais(@PathVariable Long id) {
-        User user = userService.findById(id);
-        Map<String, String> credenciais = Map.of(
-            "username", user.getUsername() != null ? user.getUsername() : "",
-            "senha", "(não disponível por segurança)"
-        );
+    public ResponseEntity<UserPlainPassword> getCredenciais(@PathVariable Long id) {
+        UserPlainPassword credenciais = userService.getCredenciais(id);
         return ResponseEntity.ok(credenciais);
     }
 

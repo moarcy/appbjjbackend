@@ -345,12 +345,8 @@ public class UserService {
         String rawPassword;
         boolean novoUsuario = user.getId() == null;
         if (novoUsuario) {
-            if (user.getUsername() == null || user.getUsername().isBlank()) {
-                username = generateUsername(user.getNome());
-                user.setUsername(username);
-            } else {
-                username = user.getUsername();
-            }
+            username = generateUsername(user.getNome());
+            user.setUsername(username);
             rawPassword = generatePassword();
             user.setPassword(passwordEncoder.encode(rawPassword));
         } else {

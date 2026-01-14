@@ -16,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.Set;
@@ -186,5 +187,26 @@ public class DataLoader implements CommandLineRunner {
         log.info("Professores: {}", professorRepository.count());
         log.info("Turmas: {}", turmaRepository.count());
         log.info("Alunos: {}", userRepository.count());
+    }
+
+    private String generateUsername(String nome) {
+        String baseUsername = nome.toLowerCase().replace(" ", ".");
+        String username = baseUsername;
+        int counter = 1;
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + counter;
+            counter++;
+        }
+        return username;
+    }
+
+    private String generatePassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }
