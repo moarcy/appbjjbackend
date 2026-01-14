@@ -52,6 +52,12 @@ public class ProfessorService {
         return professorRepository.save(professor);
     }
 
+    public Professor desativar(Long id) {
+        Professor professor = findById(id);
+        professor.setAtivo(false);
+        return professorRepository.save(professor);
+    }
+
     private void validarGrau(Integer grau) {
         if (grau != null && (grau < 0 || grau > 4)) {
             throw new IllegalArgumentException("Grau deve ser entre 0 e 4");

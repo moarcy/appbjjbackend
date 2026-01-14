@@ -60,7 +60,7 @@ public class ProfessorController {
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<?> desativar(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok("Professor desativado com sucesso");
+            return ResponseEntity.ok(professorService.desativar(id));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
