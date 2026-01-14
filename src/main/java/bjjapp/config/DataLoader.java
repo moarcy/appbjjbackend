@@ -3,6 +3,8 @@ package bjjapp.config;
 import bjjapp.entity.Professor;
 import bjjapp.entity.Turma;
 import bjjapp.entity.User;
+import bjjapp.entity.School;
+import bjjapp.entity.School.SchoolStatus;
 import bjjapp.enums.DiaSemana;
 import bjjapp.enums.Faixa;
 import bjjapp.enums.Modalidade;
@@ -10,6 +12,7 @@ import bjjapp.enums.Role;
 import bjjapp.repository.ProfessorRepository;
 import bjjapp.repository.TurmaRepository;
 import bjjapp.repository.UserRepository;
+import bjjapp.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -32,11 +35,28 @@ public class DataLoader implements CommandLineRunner {
     private final ProfessorRepository professorRepository;
     private final TurmaRepository turmaRepository;
     private final UserRepository userRepository;
+    private final SchoolRepository schoolRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
         log.info("Verificando dados iniciais...");
+
+        // Criar escola padrão se não existir
+        School defaultSchool = schoolRepository.findBySlugAndDeletedAtIsNull("escola-padrao").orElse(null);
+        if (defaultSchool == null) {
+            log.info("Criando escola padrão...");
+            defaultSchool = School.builder()
+                .name("Escola Padrão de Jiu-Jitsu")
+                .slug("escola-padrao")
+                .status(SchoolStatus.ACTIVE)
+                .phone("11999999999")
+                .build();
+            schoolRepository.save(defaultSchool);
+            log.info("Escola padrão criada");
+        } else {
+            log.info("Escola padrão já existe, pulando criação");
+        }
 
         // Criar professores se não existirem
         if (professorRepository.count() == 0) {
@@ -46,18 +66,21 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Mestre Carlos Silva")
                 .faixa(Faixa.PRETA)
                 .grau(4)
+                .school(defaultSchool)
                 .build());
 
             professorRepository.save(Professor.builder()
                 .nome("Professor João Santos")
                 .faixa(Faixa.PRETA)
                 .grau(2)
+                .school(defaultSchool)
                 .build());
 
             professorRepository.save(Professor.builder()
                 .nome("Professor Pedro Lima")
                 .faixa(Faixa.MARROM)
                 .grau(3)
+                .school(defaultSchool)
                 .build());
 
             log.info("3 professores criados");
@@ -73,6 +96,7 @@ public class DataLoader implements CommandLineRunner {
                 .horario(LocalTime.of(7, 0))
                 .ativo(true)
                 .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
+                .school(defaultSchool)
                 .build());
 
             turmaRepository.save(Turma.builder()
@@ -81,6 +105,7 @@ public class DataLoader implements CommandLineRunner {
                 .horario(LocalTime.of(19, 0))
                 .ativo(true)
                 .dias(Set.of(DiaSemana.SEGUNDA, DiaSemana.QUARTA, DiaSemana.SEXTA))
+                .school(defaultSchool)
                 .build());
 
             turmaRepository.save(Turma.builder()
@@ -89,6 +114,7 @@ public class DataLoader implements CommandLineRunner {
                 .horario(LocalTime.of(20, 0))
                 .ativo(true)
                 .dias(Set.of(DiaSemana.TERCA, DiaSemana.QUINTA))
+                .school(defaultSchool)
                 .build());
 
             turmaRepository.save(Turma.builder()
@@ -97,6 +123,7 @@ public class DataLoader implements CommandLineRunner {
                 .horario(LocalTime.of(17, 0))
                 .ativo(true)
                 .dias(Set.of(DiaSemana.SABADO))
+                .school(defaultSchool)
                 .build());
 
             log.info("4 turmas criadas");
@@ -114,6 +141,7 @@ public class DataLoader implements CommandLineRunner {
                 .aulasAcumuladas(15)
                 .aulasDesdeUltimaGraduacao(15)
                 .role(Role.ALUNO)
+                .school(defaultSchool)
                 .build());
 
             userRepository.save(User.builder()
@@ -124,6 +152,7 @@ public class DataLoader implements CommandLineRunner {
                 .aulasAcumuladas(80)
                 .aulasDesdeUltimaGraduacao(25)
                 .role(Role.ALUNO)
+                .school(defaultSchool)
                 .build());
 
             userRepository.save(User.builder()
@@ -134,6 +163,7 @@ public class DataLoader implements CommandLineRunner {
                 .aulasAcumuladas(150)
                 .aulasDesdeUltimaGraduacao(10)
                 .role(Role.ALUNO)
+                .school(defaultSchool)
                 .build());
 
             userRepository.save(User.builder()
@@ -144,6 +174,7 @@ public class DataLoader implements CommandLineRunner {
                 .aulasAcumuladas(55)
                 .aulasDesdeUltimaGraduacao(35)
                 .role(Role.ALUNO)
+                .school(defaultSchool)
                 .build());
 
             userRepository.save(User.builder()
@@ -154,6 +185,7 @@ public class DataLoader implements CommandLineRunner {
                 .aulasAcumuladas(200)
                 .aulasDesdeUltimaGraduacao(5)
                 .role(Role.ALUNO)
+                .school(defaultSchool)
                 .build());
 
             log.info("5 alunos criados");
