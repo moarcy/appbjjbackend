@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,6 +49,9 @@ public class Turma {
     @Column(nullable = false)
     @Builder.Default
     private boolean ativo = true;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @ManyToMany(mappedBy = "turmas", fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"turmas", "chamadas"})
