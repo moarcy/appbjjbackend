@@ -176,7 +176,7 @@ public class DataLoader implements CommandLineRunner {
                 .nome("Administrador")
                 .username("admin")
                 .password(passwordEncoder.encode("admin"))
-                .role(Role.ADMIN)
+                .role(Role.SUPER_ADMIN)
                 .ativo(true)
                 .build();
             userRepository.save(admin);

@@ -6,8 +6,8 @@ package bjjapp.enums;
 public enum Role {
     SUPER_ADMIN("Super Administrador"),
     SCHOOL_ADMIN("Administrador da Escola"),
-    TEACHER("Professor"),
-    STUDENT("Aluno");
+    PROFESSOR("Professor"),
+    ALUNO("Aluno");
 
     private final String descricao;
 

@@ -124,7 +124,7 @@ public class ChamadaService {
         List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
         System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - chamadas encontradas: " + todasChamadas.size());
         for (Chamada chamada : todasChamadas) {
-            System.out.println("[DEBUG] chamadaId: " + chamada.getId() + ", dataHoraInicio: " + chamada.getDataHoraInicio() + ", finalizada: " + chamada.getFinalizada() + ", ativo: " + chamada.isAtivo());
+            System.out.println("[DEBUG] chamadaId: " + chamada.getId() + ", dataHoraInicio: " + chamada.getDataHoraInicio() + ", finalizada: " + chamada.getFinalizada());
         }
 
         List<Chamada> presencas = new java.util.ArrayList<>();

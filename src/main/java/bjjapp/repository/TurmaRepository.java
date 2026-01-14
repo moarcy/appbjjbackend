@@ -21,4 +21,6 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
     List<Turma> findByAtivoTrue();
 
     List<Turma> findByModalidadeAndAtivoTrue(Modalidade modalidade);
+
+    Optional<Turma> findByIdAndSchoolIdAndDeletedAtIsNull(Long id, Long schoolId);
 }

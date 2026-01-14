@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ public class User {
     private String plainPassword;
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Role role = Role.STUDENT;
+    private Role role = Role.ALUNO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id")
@@ -104,6 +105,9 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private boolean ativo = true;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // Métodos de negócio
 
