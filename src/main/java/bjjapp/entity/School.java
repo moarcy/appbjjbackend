@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
     @Index(name = "idx_school_slug", columnList = "slug"),
     @Index(name = "idx_school_status", columnList = "status")
 })
-@Where(clause = "deleted_at IS NULL")  // Filtro global para soft delete
+@SQLRestriction(value = "deleted_at IS NULL")  // Filtro global para soft delete
 @Data
 @Builder
 @AllArgsConstructor
