@@ -103,7 +103,9 @@ public class UserService {
     }
 
     public List<User> findAll() {
-        return userRepository.findAllByAtivoTrue();
+        return userRepository.findAllByAtivoTrue().stream()
+                .filter(user -> user.getRole() == Role.ALUNO)
+                .collect(Collectors.toList());
     }
 
     public User findById(Long id) {
