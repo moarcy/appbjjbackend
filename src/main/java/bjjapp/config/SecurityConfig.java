@@ -29,33 +29,41 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/auth/login",
-                    "/auth/register"
-                ).permitAll()
-                .requestMatchers("/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/historico/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/save").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/professores/deactivate/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/turmas/deactivate/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers(HttpMethod.PUT, "/users/deactivate/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/turmas/deactivate/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/professores/deactivate/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/users/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
-                .requestMatchers("/requisitos-graduacao/**").permitAll()
-                .anyRequest().authenticated()
-            )
+                .authorizeHttpRequests(auth -> auth
+
+                        // PUBLIC
+                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+
+                        // PUT ESPECÍFICOS (PRIMEIRO!)
+                        .requestMatchers(HttpMethod.PUT, "/users/deactivate/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/turmas/deactivate/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/professores/deactivate/**").hasRole("ADMIN")
+
+                        // USERS
+                        .requestMatchers("/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/users/historico/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/users/save").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
+
+                        // PROFESSORES
+                        .requestMatchers("/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
+
+                        // TURMAS
+                        .requestMatchers("/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
+
+                        // CHAMADAS
+                        .requestMatchers("/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
+                        .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
+
+                        // OUTROS
+                        .requestMatchers("/requisitos-graduacao/**").permitAll()
+
+                        .anyRequest().authenticated()
+                )
             .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
