@@ -17,7 +17,8 @@ public class CorsConfig {
 
         config.setAllowedOrigins(List.of(
                 "https://www.appbjj.com.br",
-                "https://appbjj.com.br"
+                "https://appbjj.com.br",
+                "https://appbjjfront-hvhk.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
