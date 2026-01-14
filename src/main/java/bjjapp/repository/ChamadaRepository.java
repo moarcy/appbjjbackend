@@ -55,16 +55,16 @@ public interface ChamadaRepository extends JpaRepository<Chamada, Long> {
     @Query("SELECT c FROM Chamada c WHERE c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true")
     List<Chamada> findByPeriodoAndAtivoTrue(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true")
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true AND a.ativo = true")
     List<Chamada> findByAlunoPresenteAndAtivoTrue(@Param("alunoId") Long alunoId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true")
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true AND a.ativo = true")
     Long countPresencasByAlunoIdAndAtivoTrue(@Param("alunoId") Long alunoId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde AND c.ativo = true")
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde AND c.ativo = true AND a.ativo = true")
     Long countPresencasDesdeAndAtivoTrue(@Param("alunoId") Long alunoId, @Param("desde") LocalDateTime desde);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true")
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true AND a.ativo = true")
     List<Chamada> findByAlunoPresenteAndPeriodoAndAtivoTrue(@Param("alunoId") Long alunoId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
 
     @Query("SELECT c FROM Chamada c WHERE c.turma.id IN :turmasIds AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true")

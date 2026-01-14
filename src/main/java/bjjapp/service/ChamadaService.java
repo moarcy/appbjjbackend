@@ -91,6 +91,19 @@ public class ChamadaService {
         List<Long> turmasIds = aluno.getTurmas().stream()
             .map(Turma::getId)
             .toList();
+
+        if (!aluno.isAtivo()) {
+            List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
+            return Map.of(
+                "presencas", new java.util.ArrayList<>(),
+                "ausencias", todasChamadas,
+                "totalChamadas", todasChamadas.size(),
+                "totalPresencas", 0,
+                "totalAusencias", todasChamadas.size(),
+                "percentualPresenca", 0.0
+            );
+        }
+
         System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - turmasIds: " + turmasIds);
 
         List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
