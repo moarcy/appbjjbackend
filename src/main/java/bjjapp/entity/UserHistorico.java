@@ -38,6 +38,10 @@ public class UserHistorico {
     @Column(nullable = false)
     private TipoAlteracao tipoAlteracao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
+
     // Método auxiliar para compatibilidade
     public LocalDateTime getDataHora() {
         return dataHoraAlteracao;

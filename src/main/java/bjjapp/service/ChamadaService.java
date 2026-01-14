@@ -1,5 +1,6 @@
 package bjjapp.service;
 
+import bjjapp.context.SchoolContext;
 import bjjapp.entity.Chamada;
 import bjjapp.entity.Professor;
 import bjjapp.entity.Turma;
@@ -30,15 +31,22 @@ public class ChamadaService {
     private final UserHistoricoService historicoService;
 
     public Chamada iniciar(Long turmaId, Long professorId) {
-        Turma turma = turmaRepository.findById(turmaId)
-            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada: " + turmaId));
+        Long schoolId = SchoolContext.get();
+        Turma turma = turmaRepository.findByIdAndSchoolIdAndDeletedAtIsNull(turmaId, schoolId)
+            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada ou de outra escola: " + turmaId));
 
-        Professor professor = professorRepository.findById(professorId)
-            .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado: " + professorId));
+        Professor professor = professorRepository.findByIdAndSchoolIdAndDeletedAtIsNull(professorId, schoolId)
+            .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado ou de outra escola: " + professorId));
+
+        // Validação cruzada
+        if (!turma.getSchool().equals(professor.getSchool())) {
+            throw new IllegalStateException("Referência cruzada entre escolas");
+        }
 
         Chamada chamada = Chamada.builder()
             .turma(turma)
             .professor(professor)
+            .school(turma.getSchool())
             .dataHoraInicio(LocalDateTime.now())
             .finalizada(false)
             .alunosPresentes(new java.util.HashSet<>())
@@ -49,7 +57,8 @@ public class ChamadaService {
 
     @Transactional(readOnly = true)
     public List<Chamada> findAll() {
-        return chamadaRepository.findAllByAtivoTrue();
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.findAllBySchoolIdAndDeletedAtIsNull(schoolId);
     }
 
     @Transactional(readOnly = true)
@@ -60,22 +69,26 @@ public class ChamadaService {
 
     @Transactional(readOnly = true)
     public List<Chamada> findAbertas() {
-        return chamadaRepository.findByFinalizadaFalseAndAtivoTrue();
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.findByFinalizadaFalseAndSchoolIdAndDeletedAtIsNull(schoolId);
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByTurmaId(Long turmaId) {
-        return chamadaRepository.findByTurmaIdAndAtivoTrue(turmaId);
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.findByTurmaIdAndSchoolIdAndDeletedAtIsNull(turmaId, schoolId);
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByAlunoId(Long alunoId) {
-        return chamadaRepository.findByAlunoPresenteAndAtivoTrue(alunoId);
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.findByAlunoPresenteAndSchoolIdAndDeletedAtIsNull(alunoId, schoolId);
     }
 
     @Transactional(readOnly = true)
     public List<Chamada> findByAlunoIdAndPeriodo(Long alunoId, LocalDateTime inicio, LocalDateTime fim) {
-        return chamadaRepository.findByAlunoPresenteAndPeriodoAndAtivoTrue(alunoId, inicio, fim);
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.findByAlunoPresenteAndPeriodoAndSchoolIdAndDeletedAtIsNull(alunoId, inicio, fim, schoolId);
     }
 
     @Transactional(readOnly = true)
@@ -92,8 +105,9 @@ public class ChamadaService {
             .map(Turma::getId)
             .toList();
 
-        if (!aluno.isAtivo()) {
-            List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
+        if (aluno.getDeletedAt() != null) {
+            Long schoolId = SchoolContext.get();
+            List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
             return Map.of(
                 "presencas", new java.util.ArrayList<>(),
                 "ausencias", todasChamadas,
@@ -106,7 +120,8 @@ public class ChamadaService {
 
         System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - turmasIds: " + turmasIds);
 
-        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndAtivoTrue(turmasIds, inicio, fim);
+        Long schoolId = SchoolContext.get();
+        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
         System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - chamadas encontradas: " + todasChamadas.size());
         for (Chamada chamada : todasChamadas) {
             System.out.println("[DEBUG] chamadaId: " + chamada.getId() + ", dataHoraInicio: " + chamada.getDataHoraInicio() + ", finalizada: " + chamada.getFinalizada() + ", ativo: " + chamada.isAtivo());
@@ -205,17 +220,19 @@ public class ChamadaService {
         if (chamada.getFinalizada()) {
             throw new IllegalStateException("Não é possível deletar chamada finalizada");
         }
-        chamada.setAtivo(false);
+        chamada.setDeletedAt(LocalDateTime.now());
         chamadaRepository.save(chamada);
     }
 
     @Transactional(readOnly = true)
     public Long countPresencas(Long alunoId) {
-        return chamadaRepository.countPresencasByAlunoIdAndAtivoTrue(alunoId);
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.countPresencasByAlunoIdAndSchoolIdAndDeletedAtIsNull(alunoId, schoolId);
     }
 
     @Transactional(readOnly = true)
     public Long countPresencasDesde(Long alunoId, LocalDateTime desde) {
-        return chamadaRepository.countPresencasDesdeAndAtivoTrue(alunoId, desde);
+        Long schoolId = SchoolContext.get();
+        return chamadaRepository.countPresencasDesdeAndSchoolIdAndDeletedAtIsNull(alunoId, desde, schoolId);
     }
 }

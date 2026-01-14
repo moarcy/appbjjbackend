@@ -4,9 +4,10 @@ package bjjapp.enums;
  * Roles de usuário no sistema
  */
 public enum Role {
-    ADMIN("Administrador"),
-    PROFESSOR("Professor"),
-    ALUNO("Aluno");
+    SUPER_ADMIN("Super Administrador"),
+    SCHOOL_ADMIN("Administrador da Escola"),
+    TEACHER("Professor"),
+    STUDENT("Aluno");
 
     private final String descricao;
 

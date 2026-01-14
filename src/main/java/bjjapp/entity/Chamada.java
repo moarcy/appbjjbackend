@@ -42,9 +42,8 @@ public class Chamada {
     @Builder.Default
     private Boolean finalizada = false;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean ativo = true;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -55,6 +54,10 @@ public class Chamada {
     @JsonIgnoreProperties({"turmas", "chamadas"})
     @Builder.Default
     private Set<User> alunosPresentes = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
 
     // Métodos de negócio
 

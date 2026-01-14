@@ -16,9 +16,11 @@ import org.springframework.http.HttpMethod;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final SchoolResolutionFilter schoolResolutionFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, SchoolResolutionFilter schoolResolutionFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.schoolResolutionFilter = schoolResolutionFilter;
     }
 
     @Bean
@@ -35,35 +37,39 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
 
                         // PUT ESPECÍFICOS (PRIMEIRO!)
-                        .requestMatchers(HttpMethod.PUT, "/users/deactivate/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/turmas/deactivate/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/professores/deactivate/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/s/**/users/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/s/**/turmas/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/s/**/professores/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
 
                         // USERS
-                        .requestMatchers("/users/me").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/users/findById/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/users/status/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/users/graduacao/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/users/historico/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/users/save").hasAnyRole("ADMIN", "PROFESSOR")
-                        .requestMatchers("/users/update/**").hasAnyRole("ADMIN", "PROFESSOR")
-                        .requestMatchers("/users/delete/**").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/s/**/users/me").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/users/findById/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/users/status/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/users/graduacao/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/users/historico/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/users/save").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                        .requestMatchers("/s/**/users/update/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                        .requestMatchers("/s/**/users/delete/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                         // PROFESSORES
-                        .requestMatchers("/professores/**").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/s/**/professores/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                         // TURMAS
-                        .requestMatchers("/turmas/**").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/s/**/turmas/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                         // CHAMADAS
-                        .requestMatchers("/chamadas/presencas-ausencias/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                        .requestMatchers("/chamadas/**").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers("/s/**/chamadas/presencas-ausencias/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers("/s/**/chamadas/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                         // OUTROS
-                        .requestMatchers("/requisitos-graduacao/**").permitAll()
+                        .requestMatchers("/s/**/requisitos-graduacao/**").permitAll()
+
+                        // SUPER_ADMIN global
+                        .requestMatchers("/admin/global/**").hasRole("SUPER_ADMIN")
 
                         .anyRequest().authenticated()
                 )
+            .addFilterBefore(schoolResolutionFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

@@ -57,7 +57,11 @@ public class User {
     private String plainPassword;
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Role role = Role.ALUNO;
+    private Role role = Role.STUDENT;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id")
+    private School school;
 
     // Campos para responsáveis (menores de 18 anos)
     private String nomeResponsavel;

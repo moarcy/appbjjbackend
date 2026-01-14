@@ -42,4 +42,8 @@ public class Professor {
     @Column(nullable = false)
     @Builder.Default
     private boolean ativo = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
 }

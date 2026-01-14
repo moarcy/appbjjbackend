@@ -16,7 +16,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "turmas", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"modalidade", "horario"})
+    @UniqueConstraint(columnNames = {"school_id", "modalidade", "horario"})
 })
 @Getter
 @Setter
@@ -57,4 +57,8 @@ public class Turma {
     @NotNull(message = "Nome é obrigatório")
     @Column(nullable = false)
     private String nome;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
 }

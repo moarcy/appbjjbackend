@@ -12,61 +12,61 @@ import java.util.List;
 @Repository
 public interface ChamadaRepository extends JpaRepository<Chamada, Long> {
 
-    List<Chamada> findByTurmaId(Long turmaId);
+    List<Chamada> findByTurmaIdAndSchoolIdAndDeletedAtIsNull(Long turmaId, Long schoolId);
 
-    List<Chamada> findByProfessorId(Long professorId);
+    List<Chamada> findByProfessorIdAndSchoolIdAndDeletedAtIsNull(Long professorId, Long schoolId);
 
-    List<Chamada> findByFinalizada(Boolean finalizada);
+    List<Chamada> findByFinalizadaAndSchoolIdAndDeletedAtIsNull(Boolean finalizada, Long schoolId);
 
-    List<Chamada> findByFinalizadaFalse();
+    List<Chamada> findByFinalizadaFalseAndSchoolIdAndDeletedAtIsNull(Long schoolId);
 
-    List<Chamada> findByFinalizadaTrue();
+    List<Chamada> findByFinalizadaTrueAndSchoolIdAndDeletedAtIsNull(Long schoolId);
 
-    @Query("SELECT c FROM Chamada c WHERE c.dataHoraInicio BETWEEN :inicio AND :fim")
-    List<Chamada> findByPeriodo(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c WHERE c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL")
+    List<Chamada> findByPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true")
-    List<Chamada> findByAlunoPresente(@Param("alunoId") Long alunoId);
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    List<Chamada> findByAlunoPresenteAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true")
-    Long countPresencasByAlunoId(@Param("alunoId") Long alunoId);
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    Long countPresencasByAlunoIdAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde")
-    Long countPresencasDesde(@Param("alunoId") Long alunoId, @Param("desde") LocalDateTime desde);
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    Long countPresencasDesdeAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("desde") LocalDateTime desde, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim")
-    List<Chamada> findByAlunoPresenteAndPeriodo(@Param("alunoId") Long alunoId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    List<Chamada> findByAlunoPresenteAndPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c WHERE c.turma.id IN :turmasIds AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim")
-    List<Chamada> findByTurmasAndPeriodo(@Param("turmasIds") List<Long> turmasIds, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c WHERE c.turma.id IN :turmasIds AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL")
+    List<Chamada> findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("turmasIds") List<Long> turmasIds, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 
-    List<Chamada> findAllByAtivoTrue();
+    List<Chamada> findAllBySchoolIdAndDeletedAtIsNull(Long schoolId);
 
-    List<Chamada> findByTurmaIdAndAtivoTrue(Long turmaId);
+    List<Chamada> findByTurmaIdAndSchoolIdAndDeletedAtIsNull(Long turmaId, Long schoolId);
 
-    List<Chamada> findByProfessorIdAndAtivoTrue(Long professorId);
+    List<Chamada> findByProfessorIdAndSchoolIdAndDeletedAtIsNull(Long professorId, Long schoolId);
 
-    List<Chamada> findByFinalizadaAndAtivoTrue(Boolean finalizada);
+    List<Chamada> findByFinalizadaAndSchoolIdAndDeletedAtIsNull(Boolean finalizada, Long schoolId);
 
-    List<Chamada> findByFinalizadaFalseAndAtivoTrue();
+    List<Chamada> findByFinalizadaFalseAndSchoolIdAndDeletedAtIsNull(Long schoolId);
 
-    List<Chamada> findByFinalizadaTrueAndAtivoTrue();
+    List<Chamada> findByFinalizadaTrueAndSchoolIdAndDeletedAtIsNull(Long schoolId);
 
-    @Query("SELECT c FROM Chamada c WHERE c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true")
-    List<Chamada> findByPeriodoAndAtivoTrue(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c WHERE c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL")
+    List<Chamada> findByPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true AND a.ativo = true")
-    List<Chamada> findByAlunoPresenteAndAtivoTrue(@Param("alunoId") Long alunoId);
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    List<Chamada> findByAlunoPresenteAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.ativo = true AND a.ativo = true")
-    Long countPresencasByAlunoIdAndAtivoTrue(@Param("alunoId") Long alunoId);
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    Long countPresencasByAlunoIdAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde AND c.ativo = true AND a.ativo = true")
-    Long countPresencasDesdeAndAtivoTrue(@Param("alunoId") Long alunoId, @Param("desde") LocalDateTime desde);
+    @Query("SELECT COUNT(c) FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraFim > :desde AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    Long countPresencasDesdeAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("desde") LocalDateTime desde, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true AND a.ativo = true")
-    List<Chamada> findByAlunoPresenteAndPeriodoAndAtivoTrue(@Param("alunoId") Long alunoId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c JOIN c.alunosPresentes a WHERE a.id = :alunoId AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
+    List<Chamada> findByAlunoPresenteAndPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("alunoId") Long alunoId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 
-    @Query("SELECT c FROM Chamada c WHERE c.turma.id IN :turmasIds AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.ativo = true")
-    List<Chamada> findByTurmasAndPeriodoAndAtivoTrue(@Param("turmasIds") List<Long> turmasIds, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+    @Query("SELECT c FROM Chamada c WHERE c.turma.id IN :turmasIds AND c.finalizada = true AND c.dataHoraInicio BETWEEN :inicio AND :fim AND c.school.id = :schoolId AND c.deletedAt IS NULL")
+    List<Chamada> findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(@Param("turmasIds") List<Long> turmasIds, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim, @Param("schoolId") Long schoolId);
 }
