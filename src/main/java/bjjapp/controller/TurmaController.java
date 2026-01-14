@@ -4,12 +4,12 @@ import bjjapp.entity.Turma;
 import bjjapp.enums.DiaSemana;
 import bjjapp.enums.Modalidade;
 import bjjapp.service.TurmaService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -21,12 +21,15 @@ public class TurmaController {
 
     private final TurmaService turmaService;
 
-    public record TurmaRequest(Turma turma, Set<DiaSemana> dias) {}
+    public record TurmaRequest(String nome, String modalidade, LocalTime horario, Set<DiaSemana> dias) {}
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody TurmaRequest request) {
         try {
-            Turma turma = request.turma();
+            Turma turma = new Turma();
+            turma.setNome(request.nome());
+            turma.setModalidade(Modalidade.fromDescricao(request.modalidade()));
+            turma.setHorario(request.horario());
             // Garante que novas turmas sejam criadas como ativas, a não ser que explicitamente informado
             if (turma.getId() == null) {
                 turma.setAtivo(true);
@@ -65,7 +68,12 @@ public class TurmaController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody TurmaRequest request) {
         try {
-            return ResponseEntity.ok(turmaService.update(id, request.turma(), request.dias()));
+            Turma turma = new Turma();
+            turma.setId(id);
+            turma.setNome(request.nome());
+            turma.setModalidade(Modalidade.fromDescricao(request.modalidade()));
+            turma.setHorario(request.horario());
+            return ResponseEntity.ok(turmaService.update(id, turma, request.dias()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

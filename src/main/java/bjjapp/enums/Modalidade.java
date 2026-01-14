@@ -18,4 +18,13 @@ public enum Modalidade {
     public String getDescricao() {
         return descricao;
     }
+
+    public static Modalidade fromDescricao(String descricao) {
+        for (Modalidade m : values()) {
+            if (m.descricao.equals(descricao)) {
+                return m;
+            }
+        }
+        throw new IllegalArgumentException("Modalidade desconhecida: " + descricao);
+    }
 }
