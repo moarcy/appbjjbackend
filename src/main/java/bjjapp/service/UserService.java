@@ -49,6 +49,7 @@ public class UserService {
             String rawPassword = generatePassword();
             user.setUsername(username);
             user.setPassword(passwordEncoder.encode(rawPassword));
+            user.setPlainPassword(rawPassword);
             // Role padrão é ALUNO, pode ser alterado para PROFESSOR via endpoint específico
         }
 
@@ -349,6 +350,7 @@ public class UserService {
             user.setUsername(username);
             rawPassword = generatePassword();
             user.setPassword(passwordEncoder.encode(rawPassword));
+            user.setPlainPassword(rawPassword);
         } else {
             username = user.getUsername();
             // Gerar senha para usuário existente se não houver credencial
@@ -356,6 +358,7 @@ public class UserService {
             if (credenciaisExistente == null) {
                 rawPassword = generatePassword();
                 user.setPassword(passwordEncoder.encode(rawPassword));
+                user.setPlainPassword(rawPassword);
             } else {
                 rawPassword = credenciaisExistente.getPlainPassword();
             }

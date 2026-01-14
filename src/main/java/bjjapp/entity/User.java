@@ -53,6 +53,8 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+    @Transient
+    private String plainPassword;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.ALUNO;
