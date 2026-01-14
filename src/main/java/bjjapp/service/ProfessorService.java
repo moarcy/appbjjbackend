@@ -2,7 +2,6 @@ package bjjapp.service;
 
 import bjjapp.entity.Professor;
 import bjjapp.enums.Faixa;
-import bjjapp.enums.TipoAlteracao;
 import bjjapp.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -51,13 +50,6 @@ public class ProfessorService {
         validarGrau(professorAtualizado.getGrau());
         professor.setGrau(professorAtualizado.getGrau());
         return professorRepository.save(professor);
-    }
-
-    public void desativar(Long id) {
-        Professor professor = findById(id);
-        historicoService.registrarHistoricoProfessor(professor, TipoAlteracao.DESATIVACAO, "Professor desativado");
-        professor.setAtivo(false);
-        professorRepository.save(professor);
     }
 
     private void validarGrau(Integer grau) {
