@@ -53,7 +53,7 @@ public class ProfessorService {
         return professorRepository.save(professor);
     }
 
-    public void delete(Long id) {
+    public void desativar(Long id) {
         Professor professor = findById(id);
         historicoService.registrarHistoricoProfessor(professor, TipoAlteracao.DESATIVACAO, "Professor desativado");
         professor.setAtivo(false);
