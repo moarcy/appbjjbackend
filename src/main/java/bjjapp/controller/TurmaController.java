@@ -88,7 +88,7 @@ public class TurmaController {
         }
     }
 
-    @PutMapping("/desativar/{id}")
+    @PutMapping("/deactivate/{id}")
     public ResponseEntity<?> desativar(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(turmaService.desativar(id));
