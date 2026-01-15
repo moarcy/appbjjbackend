@@ -96,8 +96,7 @@ public class SecurityConfig {
 
         // Domínios permitidos (Vercel + local)
         configuration.setAllowedOrigins(Arrays.asList(
-            "https://seu-frontend.vercel.app",     // Substitua pelo seu domínio Vercel
-            "https://*.vercel.app",                // Todos subdomínios Vercel
+            "https://appbjjfront-hvhk.vercel.app", // Domínio real do frontend Vercel
             "http://localhost:3000",               // Dev local
             "http://localhost:5173",               // Vite dev
             "https://localhost:3000"
