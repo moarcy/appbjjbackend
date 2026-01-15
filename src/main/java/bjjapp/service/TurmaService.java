@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -20,13 +21,11 @@ public class TurmaService {
     private final TurmaRepository turmaRepository;
 
     public Turma save(Turma turma, Set<DiaSemana> dias) {
-        // Verificar duplicata considerando apenas turmas ativas e ignorando a própria turma (em edição)
-        turmaRepository.findByModalidadeAndHorario(turma.getModalidade(), turma.getHorario())
-            .ifPresent(t -> {
-                if (t.isAtivo() && (turma.getId() == null || !t.getId().equals(turma.getId()))) {
-                    throw new IllegalArgumentException("Já existe turma com essa modalidade e horário");
-                }
-            });
+        // Verificar se já existe turma ativa com mesma modalidade e horário (regra: somente uma ativa por modalidade e horário)
+        Optional<Turma> existingActive = turmaRepository.findByModalidadeAndHorarioAndAtivoTrue(turma.getModalidade(), turma.getHorario());
+        if (existingActive.isPresent() && (turma.getId() == null || !existingActive.get().getId().equals(turma.getId()))) {
+            throw new IllegalArgumentException("Já existe turma ativa com essa modalidade e horário");
+        }
 
         if (dias != null && !dias.isEmpty()) {
             turma.setDias(dias);
@@ -77,6 +76,11 @@ public class TurmaService {
 
     public Turma ativar(Long id) {
         Turma turma = findById(id);
+        // Verificar se já existe turma ativa com mesma modalidade e horário antes de ativar
+        Optional<Turma> existingActive = turmaRepository.findByModalidadeAndHorarioAndAtivoTrue(turma.getModalidade(), turma.getHorario());
+        if (existingActive.isPresent()) {
+            throw new IllegalArgumentException("Já existe turma ativa com essa modalidade e horário");
+        }
         turma.setAtivo(true);
         return turmaRepository.save(turma);
     }
