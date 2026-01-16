@@ -11,7 +11,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        // Adiciona prefixo /api a todas as rotas REST (@RestController)
-        configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+        // Adiciona prefixo /api a todas as rotas REST (@RestController), exceto AuthController
+        configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class)
+            .and(c -> !c.getSimpleName().equals("AuthController")));
     }
 }

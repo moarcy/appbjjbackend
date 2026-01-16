@@ -49,6 +49,10 @@ public class SecurityConfig {
 
                 // AUTH PÚBLICO
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/auth/login", "/auth/register").permitAll() // Suporte sem /api
+
+                // OPTIONS para CORS
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // PUT ESPECÍFICOS
                 .requestMatchers(HttpMethod.PUT, "/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
