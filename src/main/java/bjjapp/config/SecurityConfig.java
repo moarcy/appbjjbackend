@@ -51,32 +51,22 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
 
                 // PUT ESPECÍFICOS
-                .requestMatchers(HttpMethod.PUT, "/api/s/**/users/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/s/**/turmas/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/s/**/professores/deactivate/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
 
                 // USERS
-                .requestMatchers("/api/s/**/users/me").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/users/findById/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/users/status/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/users/graduacao/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/users/historico/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/users/save").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
-                .requestMatchers("/api/s/**/users/update/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
-                .requestMatchers("/api/s/**/users/delete/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                .requestMatchers("/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
 
                 // PROFESSORES
-                .requestMatchers("/api/s/**/professores/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                .requestMatchers("/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                 // TURMAS
-                .requestMatchers("/api/s/**/turmas/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                .requestMatchers("/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
 
                 // CHAMADAS
-                .requestMatchers("/api/s/**/chamadas/presencas-ausencias/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
-                .requestMatchers("/api/s/**/chamadas/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER")
+                .requestMatchers("/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT")
 
                 // OUTROS
-                .requestMatchers("/api/s/**/requisitos-graduacao/**").permitAll()
+                .requestMatchers("/api/requisitos-graduacao/**").permitAll()
 
                 // SUPER_ADMIN global
                 .requestMatchers("/api/admin/global/**").hasRole("SUPER_ADMIN")

@@ -35,6 +35,7 @@ public class UserController {
     public record UserRequest(User user, Set<Long> turmasIds) {}
 
     @PostMapping("/save")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER')")
     public ResponseEntity<UserCreationResponse> save(@RequestBody UserRequest request) {
         UserCreationResponse response = userService.saveWithPlainPassword(request.user(), request.turmasIds());
         return ResponseEntity.ok(response);
