@@ -4,9 +4,11 @@ import bjjapp.entity.School;
 import bjjapp.entity.SchoolOwner;
 import bjjapp.entity.Invoice;
 import bjjapp.dto.request.SchoolCreationRequest;
+import bjjapp.dto.response.SchoolResponse;
 import bjjapp.enums.SchoolStatus;
 import bjjapp.service.SchoolService;
 import bjjapp.service.InvoiceService;
+import bjjapp.mapper.SchoolMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +29,7 @@ public class SchoolController {
 
     private final SchoolService schoolService;
     private final InvoiceService invoiceService;
+    private final SchoolMapper schoolMapper;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> findAll() {
@@ -34,18 +37,18 @@ public class SchoolController {
         Map<String, Long> summary = schoolService.getSummary();
         Map<String, Object> response = Map.of(
                 "summary", summary,
-                "schools", schools);
+                "schools", schoolMapper.toResponseList(schools));
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<School> create(@RequestBody School school) {
+    public ResponseEntity<SchoolResponse> create(@RequestBody School school) {
         School created = schoolService.create(school);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(schoolMapper.toResponse(created));
     }
 
     @PostMapping("/with-owner")
-    public ResponseEntity<School> createWithOwner(@Valid @RequestBody SchoolCreationRequest request) {
+    public ResponseEntity<SchoolResponse> createWithOwner(@Valid @RequestBody SchoolCreationRequest request) {
         School school = School.builder()
                 .name(request.getSchoolName())
                 .slug(request.getSchoolSlug())
@@ -64,25 +67,25 @@ public class SchoolController {
                 owner,
                 request.getSubscriptionAmount(),
                 request.getTrialDays());
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(schoolMapper.toResponse(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<School> update(@PathVariable Long id, @RequestBody School school) {
+    public ResponseEntity<SchoolResponse> update(@PathVariable Long id, @RequestBody School school) {
         School updated = schoolService.update(id, school);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(schoolMapper.toResponse(updated));
     }
 
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<School> activate(@PathVariable Long id) {
+    public ResponseEntity<SchoolResponse> activate(@PathVariable Long id) {
         School activated = schoolService.activate(id);
-        return ResponseEntity.ok(activated);
+        return ResponseEntity.ok(schoolMapper.toResponse(activated));
     }
 
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<School> deactivate(@PathVariable Long id) {
+    public ResponseEntity<SchoolResponse> deactivate(@PathVariable Long id) {
         School deactivated = schoolService.deactivate(id);
-        return ResponseEntity.ok(deactivated);
+        return ResponseEntity.ok(schoolMapper.toResponse(deactivated));
     }
 
     @DeleteMapping("/{id}")
@@ -99,19 +102,38 @@ public class SchoolController {
                 "name", school.getName(),
                 "slug", school.getSlug(),
                 "status", school.getStatus(),
-                "phone", school.getPhone(),
+                "phone", school.getPhone() != null ? school.getPhone() : "",
                 "trialStart", school.getCreatedAt(),
-                "trialEnd", school.getCreatedAt().plusDays(30), // Exemplo: 30 dias trial
-                "isExpired", school.getCreatedAt().plusDays(30).isBefore(LocalDateTime.now()),
+                "trialEnd", school.getTrialEndDate() != null ? school.getTrialEndDate() : "", // Handle potential null
+                "isExpired", school.getTrialEndDate() != null && school.getTrialEndDate().isBefore(LocalDateTime.now()),
                 "createdAt", school.getCreatedAt(),
-                "updatedAt", school.getUpdatedAt());
+                "updatedAt", school.getUpdatedAt() != null ? school.getUpdatedAt() : "");
         return ResponseEntity.ok(status);
     }
 
     @GetMapping("/{id}/billing")
     public ResponseEntity<Map<String, Object>> getBilling(@PathVariable Long id) {
         Map<String, Object> billing = schoolService.getBillingInfo(id);
-        return ResponseEntity.ok(billing);
+        // We could refactor getBillingInfo to return DTOs too, but it returns a
+        // flexible Map.
+        // For now, let's keep it but ideally we should map entities inside it.
+        // Since it's a map, let's leave it as is or map manually if we want perfection.
+        // The billing info contains: school, subscription, invoices.
+        // Let's rely on default serialization for now or map it if it contains cycles.
+        // School -> Subscription -> School (CYCLE!)
+        // So we MUST map it.
+
+        School school = (School) billing.get("school");
+        bjjapp.entity.Subscription sub = (bjjapp.entity.Subscription) billing.get("subscription");
+        List<Invoice> invoices = (List<Invoice>) billing.get("invoices");
+
+        Map<String, Object> response = Map.of(
+                "school", schoolMapper.toResponse(school),
+                "subscription", schoolMapper.toSubscriptionResponse(sub),
+                "invoices", invoices // Invoice might need DTO too or @JsonIgnoreProperties
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/invoices/generate")
