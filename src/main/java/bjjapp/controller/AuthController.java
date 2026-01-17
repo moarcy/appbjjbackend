@@ -1,6 +1,7 @@
 package bjjapp.controller;
 
 import bjjapp.config.JwtUtil;
+import bjjapp.dto.request.LoginRequest;
 import bjjapp.entity.User;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
@@ -17,7 +18,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/"})
+@CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000",
+        "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/" })
 public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
@@ -25,7 +27,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
-        System.out.println("[DEBUG] AuthController.login: Iniciando login para username: " + loginRequest.getUsername());
+        System.out
+                .println("[DEBUG] AuthController.login: Iniciando login para username: " + loginRequest.getUsername());
 
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
@@ -38,7 +41,8 @@ public class AuthController {
         }
 
         User user = userOpt.get();
-        System.out.println("[DEBUG] AuthController.login: Usuário encontrado: " + user.getUsername() + ", role: " + user.getRole() + ", school: " + (user.getSchool() != null ? user.getSchool().getName() : "null"));
+        System.out.println("[DEBUG] AuthController.login: Usuário encontrado: " + user.getUsername() + ", role: "
+                + user.getRole() + ", school: " + (user.getSchool() != null ? user.getSchool().getName() : "null"));
 
         System.out.println("[DEBUG] AuthController.login: Verificando senha");
         if (!userService.checkPassword(password, user.getPassword())) {
@@ -51,15 +55,13 @@ public class AuthController {
         System.out.println("[DEBUG] AuthController.login: Token gerado, login bem-sucedido para: " + username);
 
         return ResponseEntity.ok(Map.of(
-            "token", token,
-            "user", Map.of(
-                "id", user.getId(),
-                "nome", user.getNome(),
-                "username", user.getUsername(),
-                "role", user.getRole().name()
-            ),
-            "message", "Login realizado com sucesso"
-        ));
+                "token", token,
+                "user", Map.of(
+                        "id", user.getId(),
+                        "nome", user.getNome(),
+                        "username", user.getUsername(),
+                        "role", user.getRole().name()),
+                "message", "Login realizado com sucesso"));
     }
 
     @PostMapping("/register")

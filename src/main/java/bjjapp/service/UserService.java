@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import bjjapp.controller.UserCreationResponse;
+import bjjapp.dto.response.UserCreationResponse;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
@@ -84,10 +84,10 @@ public class UserService {
         Set<Turma> turmas = new HashSet<>();
         if (turmasIds != null && !turmasIds.isEmpty()) {
             turmas = turmasIds.stream()
-                .map(turmaRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+                    .map(turmaRepository::findById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toSet());
         }
         user.setTurmas(new HashSet<>()); // Temporariamente vazio
         User saved = save(user); // Garante que o usuário tenha ID
@@ -112,7 +112,7 @@ public class UserService {
     public User findById(Long id) {
         log.info("Buscando usuário por ID: {}", id);
         return userRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));
     }
 
     public List<User> findByNome(String nome) {
@@ -129,8 +129,8 @@ public class UserService {
 
     public List<User> findAptosParaGraduacao() {
         return userRepository.findAllByAtivoTrue().stream()
-            .filter(User::isAptoParaGraduacao)
-            .collect(Collectors.toList());
+                .filter(User::isAptoParaGraduacao)
+                .collect(Collectors.toList());
     }
 
     public User update(Long id, User user) {
@@ -189,10 +189,10 @@ public class UserService {
         Set<Turma> turmasNovas = new HashSet<>();
         if (turmasIds != null && !turmasIds.isEmpty()) {
             turmasNovas = turmasIds.stream()
-                .map(turmaRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+                    .map(turmaRepository::findById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toSet());
         }
         // Remover o usuário das turmas antigas que não estão mais presentes
         for (Turma turma : turmasAntigas) {
@@ -216,10 +216,10 @@ public class UserService {
     public void updateTurmas(Long userId, Set<Long> turmasIds) {
         User user = findById(userId);
         Set<Turma> turmas = turmasIds.stream()
-            .map(turmaRepository::findById)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toSet());
+                .map(turmaRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
         user.setTurmas(turmas);
         userRepository.save(user);
         historicoService.registrarHistorico(user, TipoAlteracao.TURMA, "Turmas atualizadas");
@@ -239,18 +239,18 @@ public class UserService {
         boolean apto = user.isAptoParaGraduacao();
 
         return Map.of(
-            "grauAtual", user.getGrau(),
-            "aulasFaltando", aulasRestantes,
-            "status", apto ? "Apto" : "Não apto",
-            "aulasParaProximoGrau", aulasParaProximoGrau,
-            "aulasDesdeUltimaGraduacao", user.getAulasDesdeUltimaGraduacao()
-        );
+                "grauAtual", user.getGrau(),
+                "aulasFaltando", aulasRestantes,
+                "status", apto ? "Apto" : "Não apto",
+                "aulasParaProximoGrau", aulasParaProximoGrau,
+                "aulasDesdeUltimaGraduacao", user.getAulasDesdeUltimaGraduacao());
     }
 
     public double getPercentualProgressao(Long id) {
         User user = findById(id);
         int aulasParaProximoGrau = user.getAulasParaProximoGrau();
-        if (aulasParaProximoGrau == 0) return 100.0;
+        if (aulasParaProximoGrau == 0)
+            return 100.0;
         return Math.min(100.0, (double) user.getAulasDesdeUltimaGraduacao() / aulasParaProximoGrau * 100);
     }
 
@@ -279,10 +279,9 @@ public class UserService {
     public Map<String, Long> getEstatisticasFaixas() {
         List<User> users = userRepository.findAllByAtivoTrue();
         return users.stream()
-            .collect(Collectors.groupingBy(
-                user -> user.getFaixa().name(),
-                Collectors.counting()
-            ));
+                .collect(Collectors.groupingBy(
+                        user -> user.getFaixa().name(),
+                        Collectors.counting()));
     }
 
     public User updateCriterios(Long id, Set<Integer> criterios) {
@@ -311,16 +310,17 @@ public class UserService {
 
     public User createProfessor(String nome) {
         User professor = User.builder()
-            .nome(nome)
-            .role(Role.PROFESSOR)
-            .build();
+                .nome(nome)
+                .role(Role.PROFESSOR)
+                .build();
         return save(professor);
     }
 
     public UserPlainPassword getCredenciais(Long userId) {
         UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(userId);
         if (credenciais == null) {
-            // Criar credenciais se não existirem (para usuários criados antes da implementação)
+            // Criar credenciais se não existirem (para usuários criados antes da
+            // implementação)
             User user = findById(userId);
             if (user.getUsername() != null) {
                 credenciais = new UserPlainPassword();
@@ -365,7 +365,8 @@ public class UserService {
         }
         // Salvar usuário e turmas (bidirecional)
         User saved = save(user, turmasIds);
-        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO, novoUsuario ? "Usuário cadastrado" : "Credenciais geradas para usuário existente");
+        historicoService.registrarHistorico(saved, TipoAlteracao.CADASTRO,
+                novoUsuario ? "Usuário cadastrado" : "Credenciais geradas para usuário existente");
         // Salvar senha em texto claro
         UserPlainPassword credenciais = userPlainPasswordRepository.findByUserId(saved.getId());
         if (credenciais == null && rawPassword != null) {

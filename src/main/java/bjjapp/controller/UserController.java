@@ -8,6 +8,8 @@ import bjjapp.enums.Faixa;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
 import bjjapp.service.RequisitosGraduacaoService;
+import bjjapp.dto.response.UserCreationResponse;
+import bjjapp.dto.request.UserRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,13 +28,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br"})
+@CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000",
+        "https://appbjj.com.br" })
 public class UserController {
 
     private final UserService userService;
     private final RequisitosGraduacaoService requisitosGraduacaoService;
-
-    public record UserRequest(User user, Set<Long> turmasIds) {}
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER')")
@@ -120,23 +121,24 @@ public class UserController {
                 requisitos = requisitosGraduacaoService.getRequisitosParaProximaFaixa(user.getFaixa(), user.getIdade());
             }
             Set<Integer> concluidos = user.getCriteriosConcluidos() != null
-                ? user.getCriteriosConcluidos()
-                : new java.util.HashSet<>();
+                    ? user.getCriteriosConcluidos()
+                    : new java.util.HashSet<>();
             boolean[] criteriosMarcados = new boolean[requisitos.size()];
             int totalConcluidos = 0;
             for (int i = 0; i < requisitos.size(); i++) {
                 criteriosMarcados[i] = concluidos.contains(i);
-                if (criteriosMarcados[i]) totalConcluidos++;
+                if (criteriosMarcados[i])
+                    totalConcluidos++;
             }
             boolean prontoParaProximaFaixa = requisitosGraduacaoService.isProntoParaProximaFaixa(
-                user.getFaixa(),
-                user.getGrau(),
-                totalConcluidos,
-                requisitos.size(),
-                user.getIdade()
-            );
+                    user.getFaixa(),
+                    user.getGrau(),
+                    totalConcluidos,
+                    requisitos.size(),
+                    user.getIdade());
             Integer idadeMinimaProximaFaixa = faixaRequisitos != null
-                ? requisitosGraduacaoService.getIdadeMinima(faixaRequisitos) : null;
+                    ? requisitosGraduacaoService.getIdadeMinima(faixaRequisitos)
+                    : null;
             Map<String, Object> response = new java.util.HashMap<>();
             response.put("requisitos", requisitos);
             response.put("criteriosMarcados", criteriosMarcados);
@@ -159,7 +161,8 @@ public class UserController {
     }
 
     @PutMapping("/graduacao/{id}")
-    public ResponseEntity<?> atualizarChecklistGraduacao(@PathVariable Long id, @RequestBody boolean[] criteriosMarcados) {
+    public ResponseEntity<?> atualizarChecklistGraduacao(@PathVariable Long id,
+            @RequestBody boolean[] criteriosMarcados) {
         // Converter array de boolean para Set de índices
         Set<Integer> novosIndices = new java.util.HashSet<>();
         for (int i = 0; i < criteriosMarcados.length; i++) {
@@ -169,10 +172,9 @@ public class UserController {
         }
         User user = userService.updateCriterios(id, novosIndices);
         return ResponseEntity.ok(Map.of(
-            "mensagem", "Critérios atualizados com sucesso",
-            "totalConcluidos", novosIndices.size(),
-            "criteriosConcluidos", novosIndices
-        ));
+                "mensagem", "Critérios atualizados com sucesso",
+                "totalConcluidos", novosIndices.size(),
+                "criteriosConcluidos", novosIndices));
     }
 
     @PostMapping("/conceder-grau/{id}")
@@ -198,12 +200,13 @@ public class UserController {
         boolean menorDeIdade = idade != null && idade < 18;
         Map<String, Object> campos = new java.util.HashMap<>();
         campos.put("menorDeIdade", menorDeIdade);
-        campos.put("camposObrigatorios", menorDeIdade ?
-            Arrays.asList("nome", "dataNascimento", "nomeResponsavel", "whatsappResponsavel", "dataInicioPratica") :
-            Arrays.asList("nome", "dataNascimento", "telefoneContato", "dataInicioPratica"));
-        campos.put("camposOpcionais", menorDeIdade ?
-            Arrays.asList("telefoneContato", "dataUltimaGraduacao") :
-            Arrays.asList("nomeResponsavel", "whatsappResponsavel", "dataUltimaGraduacao"));
+        campos.put("camposObrigatorios",
+                menorDeIdade
+                        ? Arrays.asList("nome", "dataNascimento", "nomeResponsavel", "whatsappResponsavel",
+                                "dataInicioPratica")
+                        : Arrays.asList("nome", "dataNascimento", "telefoneContato", "dataInicioPratica"));
+        campos.put("camposOpcionais", menorDeIdade ? Arrays.asList("telefoneContato", "dataUltimaGraduacao")
+                : Arrays.asList("nomeResponsavel", "whatsappResponsavel", "dataUltimaGraduacao"));
         return ResponseEntity.ok(campos);
     }
 }
