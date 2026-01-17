@@ -1,10 +1,8 @@
 package bjjapp.entity;
 
+import bjjapp.enums.SchoolStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,23 +11,26 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "schools", indexes = {
-    @Index(name = "idx_school_slug", columnList = "slug"),
-    @Index(name = "idx_school_status", columnList = "status")
+        @Index(name = "idx_school_slug", columnList = "slug"),
+        @Index(name = "idx_school_status", columnList = "status")
 })
-@SQLRestriction(value = "deleted_at IS NULL")  // Filtro global para soft delete
+@SQLRestriction(value = "deleted_at IS NULL")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class School {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100, updatable = false)  // Slug imutável
+    @Column(nullable = false, unique = true, length = 100, updatable = false)
     private String slug;
 
     @Enumerated(EnumType.STRING)
@@ -44,10 +45,12 @@ public class School {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
+    @ToString.Exclude
     private SchoolOwner owner;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
+    @ToString.Exclude
     private Subscription subscription;
 
     @Column(name = "deleted_at")
@@ -60,8 +63,4 @@ public class School {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum SchoolStatus {
-        ACTIVE, INACTIVE
-    }
 }

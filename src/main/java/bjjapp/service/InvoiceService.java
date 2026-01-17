@@ -3,6 +3,9 @@ package bjjapp.service;
 import bjjapp.entity.Invoice;
 import bjjapp.entity.School;
 import bjjapp.entity.Subscription;
+import bjjapp.enums.InvoiceStatus;
+import bjjapp.enums.PaymentMethod;
+import bjjapp.enums.SubscriptionStatus;
 import bjjapp.repository.InvoiceRepository;
 import bjjapp.repository.SchoolRepository;
 import bjjapp.repository.SubscriptionRepository;
@@ -10,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -33,13 +35,13 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public Invoice findById(Long id) {
         return invoiceRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Fatura não encontrada: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Fatura não encontrada: " + id));
     }
 
     @Transactional
     public Invoice generateNextInvoice(Long schoolId) {
         School school = schoolRepository.findById(schoolId)
-            .orElseThrow(() -> new IllegalArgumentException("Escola não encontrada: " + schoolId));
+                .orElseThrow(() -> new IllegalArgumentException("Escola não encontrada: " + schoolId));
 
         if (school.getSubscription() == null) {
             throw new IllegalArgumentException("Escola não possui assinatura");
@@ -53,23 +55,23 @@ public class InvoiceService {
         LocalDate dueDate = nextMonth.atDay(10); // Exemplo: dia 10 do mês
 
         Invoice invoice = Invoice.builder()
-            .school(school)
-            .subscription(subscription)
-            .referenceMonth(nextMonth)
-            .dueDate(dueDate)
-            .amount(subscription.getAmount())
-            .status(Invoice.InvoiceStatus.PENDING)
-            .build();
+                .school(school)
+                .subscription(subscription)
+                .referenceMonth(nextMonth)
+                .dueDate(dueDate)
+                .amount(subscription.getAmount())
+                .status(InvoiceStatus.PENDING)
+                .build();
 
         return invoiceRepository.save(invoice);
     }
 
     @Transactional
-    public Invoice markAsPaid(Long invoiceId, Invoice.PaymentMethod paymentMethod, String notes) {
+    public Invoice markAsPaid(Long invoiceId, PaymentMethod paymentMethod, String notes) {
         Invoice invoice = findById(invoiceId);
         LocalDateTime now = LocalDateTime.now();
 
-        invoice.setStatus(Invoice.InvoiceStatus.PAID);
+        invoice.setStatus(InvoiceStatus.PAID);
         invoice.setPaidAt(now);
         invoice.setPaymentMethod(paymentMethod);
         invoice.setNotes(notes);
@@ -84,30 +86,31 @@ public class InvoiceService {
         }
 
         // Se estava PAST_DUE, voltar para ACTIVE
-        if (subscription.getStatus() == Subscription.SubscriptionStatus.PAST_DUE) {
-            subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+        if (subscription.getStatus() == SubscriptionStatus.PAST_DUE) {
+            subscription.setStatus(SubscriptionStatus.ACTIVE);
         }
 
         subscriptionRepository.save(subscription);
         return invoiceRepository.save(invoice);
     }
 
-    // Método para atualizar status baseado em datas (chamado periodicamente ou manualmente)
+    // Método para atualizar status baseado em datas (chamado periodicamente ou
+    // manualmente)
     @Transactional
     public void updateOverdueInvoices() {
         LocalDate today = LocalDate.now();
         List<Invoice> pendingInvoices = invoiceRepository.findAll().stream()
-            .filter(inv -> inv.getStatus() == Invoice.InvoiceStatus.PENDING && inv.getDueDate().isBefore(today))
-            .toList();
+                .filter(inv -> inv.getStatus() == InvoiceStatus.PENDING && inv.getDueDate().isBefore(today))
+                .toList();
 
         for (Invoice invoice : pendingInvoices) {
-            invoice.setStatus(Invoice.InvoiceStatus.OVERDUE);
+            invoice.setStatus(InvoiceStatus.OVERDUE);
             invoiceRepository.save(invoice);
 
             // Se houver OVERDUE, marcar subscription como PAST_DUE
             Subscription subscription = invoice.getSubscription();
-            if (subscription.getStatus() == Subscription.SubscriptionStatus.ACTIVE) {
-                subscription.setStatus(Subscription.SubscriptionStatus.PAST_DUE);
+            if (subscription.getStatus() == SubscriptionStatus.ACTIVE) {
+                subscription.setStatus(SubscriptionStatus.PAST_DUE);
                 subscriptionRepository.save(subscription);
             }
         }

@@ -1,10 +1,9 @@
 package bjjapp.entity;
 
+import bjjapp.enums.InvoiceStatus;
+import bjjapp.enums.PaymentMethod;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -18,18 +17,22 @@ import java.time.YearMonth;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id", nullable = false)
+    @ToString.Exclude
     private School school;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id", nullable = false)
+    @ToString.Exclude
     private Subscription subscription;
 
     @Column(nullable = false)
@@ -58,12 +61,4 @@ public class Invoice {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public enum InvoiceStatus {
-        PENDING, PAID, OVERDUE, CANCELED
-    }
-
-    public enum PaymentMethod {
-        MANUAL, PIX, CASH, TRANSFER
-    }
 }
