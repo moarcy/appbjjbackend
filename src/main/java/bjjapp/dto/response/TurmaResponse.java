@@ -21,4 +21,5 @@ public class TurmaResponse {
     private LocalTime horario;
     private Set<DiaSemana> dias;
     private boolean ativo;
+    private int studentCount;
 }

@@ -15,6 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TurmaMapper {
 
+    @Mapping(target = "studentCount", expression = "java(turma.getAlunos() != null ? turma.getAlunos().size() : 0)")
     TurmaResponse toResponse(Turma turma);
 
     List<TurmaResponse> toResponseList(List<Turma> turmas);

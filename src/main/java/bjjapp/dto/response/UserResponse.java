@@ -33,4 +33,5 @@ public class UserResponse {
     private Integer aulasDesdeUltimaGraduacao;
     private boolean ativo;
     private Set<TurmaResponse> turmas;
+    private Set<Integer> criteriosConcluidos;
 }
