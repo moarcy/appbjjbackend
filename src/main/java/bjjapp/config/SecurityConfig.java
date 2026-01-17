@@ -54,6 +54,9 @@ public class SecurityConfig {
                 // OPTIONS para CORS
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                // SCHOOLS para SUPER_ADMIN
+                .requestMatchers("/schools/**").hasRole("SUPER_ADMIN")
+
                 // PUT ESPECÍFICOS
                 .requestMatchers(HttpMethod.PUT, "/api/s/**").hasAnyRole("SUPER_ADMIN", "SCHOOL_ADMIN")
 

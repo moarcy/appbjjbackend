@@ -32,7 +32,7 @@ public class SchoolResolutionFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // Whitelist para rotas públicas
-        if (path.startsWith("/api/auth/") || path.startsWith("/auth/") || path.startsWith("/admin/global/") || path.startsWith("/swagger/") ||
+        if (path.startsWith("/api/auth/") || path.startsWith("/auth/") || path.startsWith("/schools/") || path.startsWith("/admin/global/") || path.startsWith("/swagger/") ||
             path.startsWith("/actuator/") || path.startsWith("/css/") || path.startsWith("/js/") ||
             path.startsWith("/images/")) {
             filterChain.doFilter(request, response);

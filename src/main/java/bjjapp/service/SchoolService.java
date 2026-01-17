@@ -1,54 +1,72 @@
 package bjjapp.service;
 
 import bjjapp.entity.School;
-import bjjapp.entity.User;
-import bjjapp.enums.Role;
+import bjjapp.entity.School.SchoolStatus;
 import bjjapp.repository.SchoolRepository;
-import bjjapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class SchoolService {
 
     private final SchoolRepository schoolRepository;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public School createSchool(String name, String slug, String phone, String adminEmail, String adminPassword) {
-        // Validate slug uniqueness
-        if (schoolRepository.existsBySlugAndDeletedAtIsNull(slug)) {
-            throw new IllegalArgumentException("Slug já existe: " + slug);
-        }
-
-        School school = School.builder()
-            .name(name)
-            .slug(slug)
-            .status(School.SchoolStatus.ACTIVE)
-            .phone(phone)
-            .build();
-        school = schoolRepository.save(school);
-
-        User admin = User.builder()
-            .nome("Admin")  // Or derive from email
-            .username(adminEmail)
-            .password(passwordEncoder.encode(adminPassword))
-            .role(Role.SCHOOL_ADMIN)
-            .school(school)
-            .ativo(true)
-            .build();
-        userRepository.save(admin);
-
-        return school;
+    @Transactional(readOnly = true)
+    public List<School> findAll() {
+        return schoolRepository.findAll();
     }
 
-    public Optional<School> findBySlug(String slug) {
-        return schoolRepository.findBySlugAndDeletedAtIsNull(slug);
+    @Transactional(readOnly = true)
+    public School findById(Long id) {
+        return schoolRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Escola não encontrada: " + id));
+    }
+
+    public School create(School school) {
+        // Validações
+        if (school.getName() == null || school.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome da escola é obrigatório");
+        }
+        if (school.getSlug() == null || school.getSlug().trim().isEmpty()) {
+            throw new IllegalArgumentException("Slug da escola é obrigatório");
+        }
+        if (schoolRepository.existsBySlugAndDeletedAtIsNull(school.getSlug())) {
+            throw new IllegalArgumentException("Slug já existe: " + school.getSlug());
+        }
+
+        school.setStatus(SchoolStatus.ACTIVE);
+        return schoolRepository.save(school);
+    }
+
+    public School update(Long id, School school) {
+        School existing = findById(id);
+        existing.setName(school.getName());
+        existing.setPhone(school.getPhone());
+        // Slug não pode ser alterado
+        return schoolRepository.save(existing);
+    }
+
+    public School activate(Long id) {
+        School school = findById(id);
+        school.setStatus(SchoolStatus.ACTIVE);
+        return schoolRepository.save(school);
+    }
+
+    public School deactivate(Long id) {
+        School school = findById(id);
+        school.setStatus(SchoolStatus.INACTIVE);
+        return schoolRepository.save(school);
+    }
+
+    public void delete(Long id) {
+        School school = findById(id);
+        school.setDeletedAt(LocalDateTime.now());
+        schoolRepository.save(school);
     }
 }
