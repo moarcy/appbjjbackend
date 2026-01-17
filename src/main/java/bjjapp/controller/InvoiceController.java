@@ -13,19 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 @CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000",
-        "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/" })
+                "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/" })
 public class InvoiceController {
 
-    private final InvoiceService invoiceService;
+        private final InvoiceService invoiceService;
+        private final bjjapp.mapper.InvoiceMapper invoiceMapper;
 
-    @PostMapping("/{id}/pay")
-    public ResponseEntity<Invoice> markAsPaid(
-            @PathVariable Long id,
-            @RequestBody PayInvoiceRequest request) {
-        Invoice paid = invoiceService.markAsPaid(
-                id,
-                request.getPaymentMethod(),
-                request.getNotes());
-        return ResponseEntity.ok(paid);
-    }
+        @GetMapping
+        public ResponseEntity<List<bjjapp.dto.response.InvoiceResponse>> findAll() {
+                return ResponseEntity.ok(invoiceMapper.toResponseList(invoiceService.findAll()));
+        }
+
+        @PostMapping("/{id}/pay")
+        public ResponseEntity<bjjapp.dto.response.InvoiceResponse> markAsPaid(
+                        @PathVariable Long id,
+                        @RequestBody PayInvoiceRequest request) {
+                Invoice paid = invoiceService.markAsPaid(
+                                id,
+                                request.getPaymentMethod(),
+                                request.getNotes());
+                return ResponseEntity.ok(invoiceMapper.toResponse(paid));
+        }
 }

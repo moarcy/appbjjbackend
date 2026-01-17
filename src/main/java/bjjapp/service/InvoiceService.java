@@ -28,6 +28,11 @@ public class InvoiceService {
     private final SubscriptionRepository subscriptionRepository;
 
     @Transactional(readOnly = true)
+    public List<Invoice> findAll() {
+        return invoiceRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public List<Invoice> findBySchoolId(Long schoolId) {
         return invoiceRepository.findBySchoolId(schoolId);
     }

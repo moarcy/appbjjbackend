@@ -33,15 +33,14 @@ public class SchoolController {
     private final SchoolService schoolService;
     private final InvoiceService invoiceService;
     private final SchoolMapper schoolMapper;
+    private final bjjapp.mapper.InvoiceMapper invoiceMapper;
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> findAll() {
-        List<School> schools = schoolService.findAll();
-        Map<String, Long> summary = schoolService.getSummary();
-        Map<String, Object> response = Map.of(
-                "summary", summary,
-                "schools", schoolMapper.toResponseList(schools));
-        return ResponseEntity.ok(response);
+    public ResponseEntity<bjjapp.dto.response.SchoolListResponse> findAll() {
+        return ResponseEntity.ok(bjjapp.dto.response.SchoolListResponse.builder()
+                .schools(schoolMapper.toResponseList(schoolService.findAll()))
+                .summary(schoolService.getSummary())
+                .build());
     }
 
     @PostMapping
@@ -52,22 +51,18 @@ public class SchoolController {
 
     @PostMapping("/with-owner")
     public ResponseEntity<SchoolResponse> createWithOwner(@Valid @RequestBody SchoolCreationRequest request) {
-        School school = School.builder()
-                .name(request.getSchoolName())
-                .slug(request.getSchoolSlug())
-                .phone(request.getSchoolPhone())
-                .build();
-
-        SchoolOwner owner = SchoolOwner.builder()
-                .fullName(request.getOwnerFullName())
-                .email(request.getOwnerEmail())
-                .document(request.getOwnerDocument())
-                .phone(request.getOwnerPhone())
-                .build();
-
         School created = schoolService.createWithOwnerAndSubscription(
-                school,
-                owner,
+                School.builder()
+                        .name(request.getSchoolName())
+                        .slug(request.getSchoolSlug())
+                        .phone(request.getSchoolPhone())
+                        .build(),
+                SchoolOwner.builder()
+                        .fullName(request.getOwnerFullName())
+                        .email(request.getOwnerEmail())
+                        .document(request.getOwnerDocument())
+                        .phone(request.getOwnerPhone())
+                        .build(),
                 request.getSubscriptionAmount(),
                 request.getTrialDays());
         return ResponseEntity.ok(schoolMapper.toResponse(created));
@@ -81,14 +76,12 @@ public class SchoolController {
 
     @PatchMapping("/{id}/activate")
     public ResponseEntity<SchoolResponse> activate(@PathVariable Long id) {
-        School activated = schoolService.activate(id);
-        return ResponseEntity.ok(schoolMapper.toResponse(activated));
+        return ResponseEntity.ok(schoolMapper.toResponse(schoolService.activate(id)));
     }
 
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<SchoolResponse> deactivate(@PathVariable Long id) {
-        School deactivated = schoolService.deactivate(id);
-        return ResponseEntity.ok(schoolMapper.toResponse(deactivated));
+        return ResponseEntity.ok(schoolMapper.toResponse(schoolService.deactivate(id)));
     }
 
     @DeleteMapping("/{id}")
@@ -97,51 +90,24 @@ public class SchoolController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/status")
-    public ResponseEntity<Map<String, Object>> getStatus(@PathVariable Long id) {
-        School school = schoolService.findById(id);
-        Map<String, Object> status = Map.of(
-                "id", school.getId(),
-                "name", school.getName(),
-                "slug", school.getSlug(),
-                "status", school.getStatus(),
-                "phone", school.getPhone() != null ? school.getPhone() : "",
-                "trialStart", school.getCreatedAt(),
-                "trialEnd", school.getTrialEndDate() != null ? school.getTrialEndDate() : "", // Handle potential null
-                "isExpired", school.getTrialEndDate() != null && school.getTrialEndDate().isBefore(LocalDateTime.now()),
-                "createdAt", school.getCreatedAt(),
-                "updatedAt", school.getUpdatedAt() != null ? school.getUpdatedAt() : "");
-        return ResponseEntity.ok(status);
-    }
-
     @GetMapping("/{id}/billing")
-    public ResponseEntity<Map<String, Object>> getBilling(@PathVariable Long id) {
+    public ResponseEntity<bjjapp.dto.response.SchoolBillingResponse> getBilling(@PathVariable Long id) {
         Map<String, Object> billing = schoolService.getBillingInfo(id);
-        // We could refactor getBillingInfo to return DTOs too, but it returns a
-        // flexible Map.
-        // For now, let's keep it but ideally we should map entities inside it.
-        // Since it's a map, let's leave it as is or map manually if we want perfection.
-        // The billing info contains: school, subscription, invoices.
-        // Let's rely on default serialization for now or map it if it contains cycles.
-        // School -> Subscription -> School (CYCLE!)
-        // So we MUST map it.
 
         School school = (School) billing.get("school");
         bjjapp.entity.Subscription sub = (bjjapp.entity.Subscription) billing.get("subscription");
         List<Invoice> invoices = (List<Invoice>) billing.get("invoices");
 
-        Map<String, Object> response = Map.of(
-                "school", schoolMapper.toResponse(school),
-                "subscription", schoolMapper.toSubscriptionResponse(sub),
-                "invoices", invoices // Invoice might need DTO too or @JsonIgnoreProperties
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bjjapp.dto.response.SchoolBillingResponse.builder()
+                .school(schoolMapper.toResponse(school))
+                .subscription(schoolMapper.toSubscriptionResponse(sub))
+                .invoices(invoiceMapper.toResponseList(invoices))
+                .build());
     }
 
     @PostMapping("/{id}/invoices/generate")
-    public ResponseEntity<Invoice> generateInvoice(@PathVariable Long id) {
+    public ResponseEntity<bjjapp.dto.response.InvoiceResponse> generateInvoice(@PathVariable Long id) {
         Invoice invoice = invoiceService.generateNextInvoice(id);
-        return ResponseEntity.ok(invoice);
+        return ResponseEntity.ok(invoiceMapper.toResponse(invoice));
     }
 }
