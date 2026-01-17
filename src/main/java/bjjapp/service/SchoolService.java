@@ -80,8 +80,9 @@ public class SchoolService {
             throw new IllegalArgumentException("Email do responsável é obrigatório");
         }
 
-        // Criar owner
-        SchoolOwner savedOwner = schoolOwnerRepository.save(owner);
+        // Criar ou reaproveitar owner
+        SchoolOwner savedOwner = schoolOwnerRepository.findByEmail(owner.getEmail())
+                .orElseGet(() -> schoolOwnerRepository.save(owner));
 
         // Criar subscription
         LocalDateTime now = LocalDateTime.now();
