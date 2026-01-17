@@ -1,23 +1,27 @@
-ï»¿# application.properties FINAL
+# application.properties FINAL
 spring.application.name=bjjapp
-server.port=
+server.port=${PORT:8080}
 
-spring.datasource.url=
-spring.datasource.username=
-spring.datasource.password=
+# URL FIXA - use appbjjbackend.railway.internal
+spring.datasource.url=${SPRING_DATASOURCE_URL}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 
+# Adicione estas propriedades
 spring.web.resources.add-mappings=true
 spring.mvc.throw-exception-if-no-handler-found=true
 spring.web.resources.static-locations=classpath:/static/
 
+# Para debug (remova depois)
 logging.level.org.springframework.security=DEBUG
 logging.level.org.springframework.web=DEBUG
 logging.level.bjjapp=DEBUG
 
+# Configuração de erro para incluir stacktrace
 server.error.include-message=always
 server.error.include-stacktrace=always
 server.error.include-binding-errors=always

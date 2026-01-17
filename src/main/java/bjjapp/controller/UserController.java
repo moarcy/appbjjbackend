@@ -9,7 +9,9 @@ import bjjapp.service.UserAuthService;
 import bjjapp.service.UserGraduationService;
 import bjjapp.service.RequisitosGraduacaoService;
 import bjjapp.dto.response.UserCreationResponse;
+import bjjapp.dto.response.UserResponse;
 import bjjapp.dto.request.UserRequest;
+import bjjapp.mapper.UserMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class UserController {
     private final UserAuthService userAuthService;
     private final UserGraduationService userGraduationService;
     private final RequisitosGraduacaoService requisitosGraduacaoService;
+    private final UserMapper userMapper;
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER')")
@@ -42,32 +45,37 @@ public class UserController {
     }
 
     @GetMapping("/findAll")
-    public ResponseEntity<List<User>> findAll() {
-        return ResponseEntity.ok(userService.findAll());
+    public ResponseEntity<List<UserResponse>> findAll() {
+        List<User> users = userService.findAll();
+        return ResponseEntity.ok(userMapper.toResponseList(users));
     }
 
     @GetMapping("/findById/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(userService.findById(id));
+            User user = userService.findById(id);
+            return ResponseEntity.ok(userMapper.toResponse(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @GetMapping("/findByRole")
-    public ResponseEntity<List<User>> findByRole(@RequestParam Role role) {
-        return ResponseEntity.ok(userService.findByRole(role));
+    public ResponseEntity<List<UserResponse>> findByRole(@RequestParam Role role) {
+        List<User> users = userService.findByRole(role);
+        return ResponseEntity.ok(userMapper.toResponseList(users));
     }
 
     @GetMapping("/findByUsername")
-    public ResponseEntity<List<User>> findByUsername(@RequestParam String username) {
-        return ResponseEntity.ok(userService.findByUsername(username));
+    public ResponseEntity<List<UserResponse>> findByUsername(@RequestParam String username) {
+        List<User> users = userService.findByUsername(username);
+        return ResponseEntity.ok(userMapper.toResponseList(users));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.update(id, request.getUser(), request.getTurmasIds()));
+        User updated = userService.update(id, request.getUser(), request.getTurmasIds());
+        return ResponseEntity.ok(userMapper.toResponse(updated));
     }
 
     @PutMapping("/deactivate/{id}")
@@ -182,10 +190,10 @@ public class UserController {
     }
 
     @PostMapping("/conceder-grau/{id}")
-    public ResponseEntity<User> concederGrau(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> concederGrau(@PathVariable Long id) {
         User user = userService.findById(id);
         User updated = userGraduationService.concederGrau(user);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(userMapper.toResponse(updated));
     }
 
     @GetMapping("/credenciais/{id}")
@@ -195,12 +203,12 @@ public class UserController {
     }
 
     @PutMapping("/trocar-faixa/{id}")
-    public ResponseEntity<User> trocarFaixa(@PathVariable Long id, @RequestBody String novaFaixa) {
+    public ResponseEntity<UserResponse> trocarFaixa(@PathVariable Long id, @RequestBody String novaFaixa) {
         // Remove quotes if present json string
         String faixaName = novaFaixa.replaceAll("\"", "");
         User user = userService.findById(id);
         User updated = userGraduationService.trocarFaixa(user, faixaName);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(userMapper.toResponse(updated));
     }
 
     @GetMapping("/campos-cadastro")

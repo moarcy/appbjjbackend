@@ -3,8 +3,10 @@ package bjjapp.service;
 import bjjapp.entity.School;
 import bjjapp.entity.SchoolOwner;
 import bjjapp.entity.Subscription;
-import bjjapp.entity.School.SchoolStatus;
 import bjjapp.entity.Invoice;
+import bjjapp.enums.SchoolStatus;
+import bjjapp.enums.BillingCycle;
+import bjjapp.enums.SubscriptionStatus;
 import bjjapp.repository.SchoolRepository;
 import bjjapp.repository.SchoolOwnerRepository;
 import bjjapp.repository.SubscriptionRepository;
@@ -36,7 +38,7 @@ public class SchoolService {
     @Transactional(readOnly = true)
     public School findById(Long id) {
         return schoolRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Escola não encontrada: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Escola não encontrada: " + id));
     }
 
     public School create(School school) {
@@ -80,12 +82,12 @@ public class SchoolService {
         // Criar subscription
         LocalDateTime now = LocalDateTime.now();
         Subscription subscription = Subscription.builder()
-            .amount(amount)
-            .billingCycle(Subscription.BillingCycle.MONTHLY)
-            .status(Subscription.SubscriptionStatus.TRIAL)
-            .startDate(now)
-            .trialEndDate(now.plusDays(trialDays))
-            .build();
+                .amount(amount)
+                .billingCycle(BillingCycle.MONTHLY)
+                .status(SubscriptionStatus.TRIAL)
+                .startDate(now)
+                .trialEndDate(now.plusDays(trialDays))
+                .build();
         Subscription savedSubscription = subscriptionRepository.save(subscription);
 
         // Criar school
@@ -132,7 +134,8 @@ public class SchoolService {
 
         LocalDateTime now = LocalDateTime.now();
         for (School school : allSchools) {
-            if (school.getDeletedAt() != null) continue; // Skip soft deleted
+            if (school.getDeletedAt() != null)
+                continue; // Skip soft deleted
 
             if (school.getStatus() == SchoolStatus.INACTIVE) {
                 inactive++;
@@ -146,10 +149,9 @@ public class SchoolService {
         }
 
         return Map.of(
-            "active", active,
-            "trial", trial,
-            "inactive", inactive
-        );
+                "active", active,
+                "trial", trial,
+                "inactive", inactive);
     }
 
     @Transactional(readOnly = true)
@@ -158,9 +160,8 @@ public class SchoolService {
         List<Invoice> invoices = invoiceRepository.findBySchoolId(schoolId);
 
         return Map.of(
-            "school", school,
-            "subscription", school.getSubscription(),
-            "invoices", invoices
-        );
+                "school", school,
+                "subscription", school.getSubscription(),
+                "invoices", invoices);
     }
 }

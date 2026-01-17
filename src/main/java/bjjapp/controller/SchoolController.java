@@ -3,7 +3,8 @@ package bjjapp.controller;
 import bjjapp.entity.School;
 import bjjapp.entity.SchoolOwner;
 import bjjapp.entity.Invoice;
-import bjjapp.entity.School.SchoolStatus;
+import bjjapp.dto.request.SchoolCreationRequest;
+import bjjapp.enums.SchoolStatus;
 import bjjapp.service.SchoolService;
 import bjjapp.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,8 @@ import java.util.Map;
 @RequestMapping("/schools")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000", "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/"})
+@CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000",
+        "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/" })
 public class SchoolController {
 
     private final SchoolService schoolService;
@@ -31,9 +33,8 @@ public class SchoolController {
         List<School> schools = schoolService.findAll();
         Map<String, Long> summary = schoolService.getSummary();
         Map<String, Object> response = Map.of(
-            "summary", summary,
-            "schools", schools
-        );
+                "summary", summary,
+                "schools", schools);
         return ResponseEntity.ok(response);
     }
 
@@ -46,24 +47,23 @@ public class SchoolController {
     @PostMapping("/with-owner")
     public ResponseEntity<School> createWithOwner(@Valid @RequestBody SchoolCreationRequest request) {
         School school = School.builder()
-            .name(request.getSchoolName())
-            .slug(request.getSchoolSlug())
-            .phone(request.getSchoolPhone())
-            .build();
+                .name(request.getSchoolName())
+                .slug(request.getSchoolSlug())
+                .phone(request.getSchoolPhone())
+                .build();
 
         SchoolOwner owner = SchoolOwner.builder()
-            .fullName(request.getOwnerFullName())
-            .email(request.getOwnerEmail())
-            .document(request.getOwnerDocument())
-            .phone(request.getOwnerPhone())
-            .build();
+                .fullName(request.getOwnerFullName())
+                .email(request.getOwnerEmail())
+                .document(request.getOwnerDocument())
+                .phone(request.getOwnerPhone())
+                .build();
 
         School created = schoolService.createWithOwnerAndSubscription(
-            school,
-            owner,
-            request.getSubscriptionAmount(),
-            request.getTrialDays()
-        );
+                school,
+                owner,
+                request.getSubscriptionAmount(),
+                request.getTrialDays());
         return ResponseEntity.ok(created);
     }
 
@@ -95,17 +95,16 @@ public class SchoolController {
     public ResponseEntity<Map<String, Object>> getStatus(@PathVariable Long id) {
         School school = schoolService.findById(id);
         Map<String, Object> status = Map.of(
-            "id", school.getId(),
-            "name", school.getName(),
-            "slug", school.getSlug(),
-            "status", school.getStatus(),
-            "phone", school.getPhone(),
-            "trialStart", school.getCreatedAt(),
-            "trialEnd", school.getCreatedAt().plusDays(30), // Exemplo: 30 dias trial
-            "isExpired", school.getCreatedAt().plusDays(30).isBefore(LocalDateTime.now()),
-            "createdAt", school.getCreatedAt(),
-            "updatedAt", school.getUpdatedAt()
-        );
+                "id", school.getId(),
+                "name", school.getName(),
+                "slug", school.getSlug(),
+                "status", school.getStatus(),
+                "phone", school.getPhone(),
+                "trialStart", school.getCreatedAt(),
+                "trialEnd", school.getCreatedAt().plusDays(30), // Exemplo: 30 dias trial
+                "isExpired", school.getCreatedAt().plusDays(30).isBefore(LocalDateTime.now()),
+                "createdAt", school.getCreatedAt(),
+                "updatedAt", school.getUpdatedAt());
         return ResponseEntity.ok(status);
     }
 
