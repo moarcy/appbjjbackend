@@ -4,11 +4,11 @@ import bjjapp.config.JwtUtil;
 import bjjapp.dto.request.LoginRequest;
 import bjjapp.entity.User;
 import bjjapp.enums.Role;
+import bjjapp.service.UserAuthService;
 import bjjapp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -21,9 +21,10 @@ import java.util.Optional;
 @CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000",
         "https://appbjj.com.br", "https://appbjjfront-hvhk.vercel.app/" })
 public class AuthController {
+
     private final UserService userService;
+    private final UserAuthService userAuthService;
     private final JwtUtil jwtUtil;
-    private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -34,18 +35,18 @@ public class AuthController {
         String password = loginRequest.getPassword();
 
         System.out.println("[DEBUG] AuthController.login: Buscando usuário: " + username);
-        Optional<User> userOpt = userService.findByUsernameAuth(username);
+        Optional<User> userOpt = userAuthService.findByUsername(username);
+
         if (userOpt.isEmpty()) {
             System.out.println("[DEBUG] AuthController.login: Usuário não encontrado: " + username);
             return ResponseEntity.badRequest().body("Usuário não encontrado");
         }
 
         User user = userOpt.get();
-        System.out.println("[DEBUG] AuthController.login: Usuário encontrado: " + user.getUsername() + ", role: "
-                + user.getRole() + ", school: " + (user.getSchool() != null ? user.getSchool().getName() : "null"));
+        System.out.println("[DEBUG] AuthController.login: Usuário encontrado: " + user.getUsername());
 
         System.out.println("[DEBUG] AuthController.login: Verificando senha");
-        if (!userService.checkPassword(password, user.getPassword())) {
+        if (!userAuthService.checkPassword(password, user.getPassword())) {
             System.out.println("[DEBUG] AuthController.login: Senha incorreta para: " + username);
             return ResponseEntity.badRequest().body("Senha incorreta");
         }

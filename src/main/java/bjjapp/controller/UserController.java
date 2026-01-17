@@ -1,12 +1,12 @@
 package bjjapp.controller;
 
 import bjjapp.entity.User;
-import bjjapp.entity.UserHistorico;
-import bjjapp.entity.Turma;
 import bjjapp.entity.UserPlainPassword;
 import bjjapp.enums.Faixa;
 import bjjapp.enums.Role;
 import bjjapp.service.UserService;
+import bjjapp.service.UserAuthService;
+import bjjapp.service.UserGraduationService;
 import bjjapp.service.RequisitosGraduacaoService;
 import bjjapp.dto.response.UserCreationResponse;
 import bjjapp.dto.request.UserRequest;
@@ -15,15 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -33,12 +30,14 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final UserAuthService userAuthService;
+    private final UserGraduationService userGraduationService;
     private final RequisitosGraduacaoService requisitosGraduacaoService;
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER')")
     public ResponseEntity<UserCreationResponse> save(@RequestBody UserRequest request) {
-        UserCreationResponse response = userService.saveWithPlainPassword(request.user(), request.turmasIds());
+        UserCreationResponse response = userService.saveWithPlainPassword(request.getUser(), request.getTurmasIds());
         return ResponseEntity.ok(response);
     }
 
@@ -68,7 +67,7 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.update(id, request.user(), request.turmasIds()));
+        return ResponseEntity.ok(userService.update(id, request.getUser(), request.getTurmasIds()));
     }
 
     @PutMapping("/deactivate/{id}")
@@ -84,7 +83,8 @@ public class UserController {
     @GetMapping("/status/{id}")
     public ResponseEntity<?> getStatus(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(userService.getStatus(id));
+            User user = userService.findById(id);
+            return ResponseEntity.ok(userGraduationService.getStatus(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -110,7 +110,6 @@ public class UserController {
             @RequestParam(required = false) String faixa) {
         try {
             User user = userService.findById(id);
-            // Usar método que retorna requisitos da PRÓXIMA faixa considerando idade
             List<String> requisitos;
             Faixa faixaRequisitos;
             if (faixa != null) {
@@ -123,6 +122,7 @@ public class UserController {
             Set<Integer> concluidos = user.getCriteriosConcluidos() != null
                     ? user.getCriteriosConcluidos()
                     : new java.util.HashSet<>();
+
             boolean[] criteriosMarcados = new boolean[requisitos.size()];
             int totalConcluidos = 0;
             for (int i = 0; i < requisitos.size(); i++) {
@@ -130,15 +130,18 @@ public class UserController {
                 if (criteriosMarcados[i])
                     totalConcluidos++;
             }
+
             boolean prontoParaProximaFaixa = requisitosGraduacaoService.isProntoParaProximaFaixa(
                     user.getFaixa(),
                     user.getGrau(),
                     totalConcluidos,
                     requisitos.size(),
                     user.getIdade());
+
             Integer idadeMinimaProximaFaixa = faixaRequisitos != null
                     ? requisitosGraduacaoService.getIdadeMinima(faixaRequisitos)
                     : null;
+
             Map<String, Object> response = new java.util.HashMap<>();
             response.put("requisitos", requisitos);
             response.put("criteriosMarcados", criteriosMarcados);
@@ -163,14 +166,15 @@ public class UserController {
     @PutMapping("/graduacao/{id}")
     public ResponseEntity<?> atualizarChecklistGraduacao(@PathVariable Long id,
             @RequestBody boolean[] criteriosMarcados) {
-        // Converter array de boolean para Set de índices
         Set<Integer> novosIndices = new java.util.HashSet<>();
         for (int i = 0; i < criteriosMarcados.length; i++) {
             if (criteriosMarcados[i]) {
                 novosIndices.add(i);
             }
         }
-        User user = userService.updateCriterios(id, novosIndices);
+        User user = userService.findById(id);
+        userGraduationService.updateCriterios(user, novosIndices);
+
         return ResponseEntity.ok(Map.of(
                 "mensagem", "Critérios atualizados com sucesso",
                 "totalConcluidos", novosIndices.size(),
@@ -179,20 +183,24 @@ public class UserController {
 
     @PostMapping("/conceder-grau/{id}")
     public ResponseEntity<User> concederGrau(@PathVariable Long id) {
-        User user = userService.concederGrau(id);
-        return ResponseEntity.ok(user);
+        User user = userService.findById(id);
+        User updated = userGraduationService.concederGrau(user);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/credenciais/{id}")
     public ResponseEntity<UserPlainPassword> getCredenciais(@PathVariable Long id) {
-        UserPlainPassword credenciais = userService.getCredenciais(id);
+        UserPlainPassword credenciais = userAuthService.getCredenciais(id);
         return ResponseEntity.ok(credenciais);
     }
 
     @PutMapping("/trocar-faixa/{id}")
     public ResponseEntity<User> trocarFaixa(@PathVariable Long id, @RequestBody String novaFaixa) {
-        User user = userService.trocarFaixa(id, novaFaixa);
-        return ResponseEntity.ok(user);
+        // Remove quotes if present json string
+        String faixaName = novaFaixa.replaceAll("\"", "");
+        User user = userService.findById(id);
+        User updated = userGraduationService.trocarFaixa(user, faixaName);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/campos-cadastro")

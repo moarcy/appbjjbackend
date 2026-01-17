@@ -19,22 +19,23 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "Nome é obrigatório")
     @Column(nullable = false)
     private String nome;
 
-    @Getter(AccessLevel.NONE)  // Usar método customizado getIdade()
+    @Getter(AccessLevel.NONE) // Usar método customizado getIdade()
     private Integer idade;
 
     private LocalDate dataNascimento;
@@ -53,15 +54,21 @@ public class User {
     // Campos de autenticação
     @Column(unique = true)
     private String username;
+
+    @ToString.Exclude
     private String password;
+
     @Transient
+    @ToString.Exclude
     private String plainPassword;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.ALUNO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id")
+    @ToString.Exclude
     private School school;
 
     // Campos para responsáveis (menores de 18 anos)
@@ -76,13 +83,11 @@ public class User {
     private String dataUltimaGraduacao; // Formato "YYYY-MM"
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "aluno_turmas",
-        joinColumns = @JoinColumn(name = "aluno_id"),
-        inverseJoinColumns = @JoinColumn(name = "turma_id")
-    )
-    @JsonIgnoreProperties({"alunos"})
+    @JoinTable(name = "aluno_turmas", joinColumns = @JoinColumn(name = "aluno_id"), inverseJoinColumns = @JoinColumn(name = "turma_id"))
+    @JsonIgnoreProperties({ "alunos", "school" })
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Turma> turmas = new HashSet<>();
 
     @Column(nullable = false)
@@ -148,7 +153,6 @@ public class User {
             this.grau++;
             resetarAulasParaGraduacao();
         }
-        // Se já estiver no grau 4, não faz nada (professor pode decidir)
     }
 
     public int getAulasParaProximoGrau() {
@@ -175,18 +179,5 @@ public class User {
     public boolean isMenorDeIdade() {
         Integer idade = getIdade();
         return idade != null && idade < 18;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id != null && id.equals(user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(id);
     }
 }
