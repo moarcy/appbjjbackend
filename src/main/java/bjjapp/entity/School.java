@@ -39,6 +39,17 @@ public class School {
     @Column(length = 20)
     private String phone;
 
+    @Column(name = "trial_end_date")
+    private LocalDateTime trialEndDate;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private SchoolOwner owner;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

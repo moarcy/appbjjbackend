@@ -4,6 +4,9 @@ import bjjapp.entity.Professor;
 import bjjapp.entity.Turma;
 import bjjapp.entity.User;
 import bjjapp.entity.School;
+import bjjapp.entity.SchoolOwner;
+import bjjapp.entity.Subscription;
+import bjjapp.entity.Invoice;
 import bjjapp.entity.School.SchoolStatus;
 import bjjapp.enums.DiaSemana;
 import bjjapp.enums.Faixa;
@@ -13,6 +16,9 @@ import bjjapp.repository.ProfessorRepository;
 import bjjapp.repository.TurmaRepository;
 import bjjapp.repository.UserRepository;
 import bjjapp.repository.SchoolRepository;
+import bjjapp.repository.SchoolOwnerRepository;
+import bjjapp.repository.SubscriptionRepository;
+import bjjapp.repository.InvoiceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -36,7 +42,10 @@ public class DataLoader implements CommandLineRunner {
     private final TurmaRepository turmaRepository;
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
+    private final SchoolOwnerRepository schoolOwnerRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final InvoiceRepository invoiceRepository;
 
     @Override
     public void run(String... args) {
@@ -215,7 +224,168 @@ public class DataLoader implements CommandLineRunner {
             log.info("Usuário admin criado com username: admin e senha: admin");
         }
 
+        // Criar dados de exemplo para schools com diferentes status
+        if (schoolRepository.count() < 5) {
+            log.info("Criando dados de exemplo para schools...");
+
+            // School in TRIAL
+            SchoolOwner owner1 = schoolOwnerRepository.save(SchoolOwner.builder()
+                .fullName("João Silva")
+                .email("joao@email.com")
+                .document("12345678901")
+                .phone("11999999991")
+                .build());
+            Subscription sub1 = subscriptionRepository.save(Subscription.builder()
+                .amount(new java.math.BigDecimal("149.90"))
+                .billingCycle(Subscription.BillingCycle.MONTHLY)
+                .status(Subscription.SubscriptionStatus.TRIAL)
+                .startDate(java.time.LocalDateTime.now().minusDays(10))
+                .trialEndDate(java.time.LocalDateTime.now().plusDays(20))
+                .build());
+            School school1 = School.builder()
+                .name("Academia Gracie Barra Centro")
+                .slug("gracie-barra-centro")
+                .status(SchoolStatus.ACTIVE)
+                .phone("11999999992")
+                .trialEndDate(java.time.LocalDateTime.now().plusDays(20))
+                .owner(owner1)
+                .subscription(sub1)
+                .build();
+            schoolRepository.save(school1);
+
+            // School ACTIVE
+            SchoolOwner owner2 = schoolOwnerRepository.save(SchoolOwner.builder()
+                .fullName("Maria Santos")
+                .email("maria@email.com")
+                .document("12345678902")
+                .phone("11999999993")
+                .build());
+            Subscription sub2 = subscriptionRepository.save(Subscription.builder()
+                .amount(new java.math.BigDecimal("199.90"))
+                .billingCycle(Subscription.BillingCycle.MONTHLY)
+                .status(Subscription.SubscriptionStatus.ACTIVE)
+                .startDate(java.time.LocalDateTime.now().minusDays(60))
+                .nextBillingDate(java.time.LocalDateTime.now().plusDays(30))
+                .build());
+            School school2 = School.builder()
+                .name("Instituto de Jiu-Jitsu")
+                .slug("instituto-jiu-jitsu")
+                .status(SchoolStatus.ACTIVE)
+                .phone("11999999994")
+                .trialEndDate(java.time.LocalDateTime.now().minusDays(30))
+                .owner(owner2)
+                .subscription(sub2)
+                .build();
+            schoolRepository.save(school2);
+
+            // School INACTIVE
+            SchoolOwner owner3 = schoolOwnerRepository.save(SchoolOwner.builder()
+                .fullName("Pedro Lima")
+                .email("pedro@email.com")
+                .document("12345678903")
+                .phone("11999999995")
+                .build());
+            Subscription sub3 = subscriptionRepository.save(Subscription.builder()
+                .amount(new java.math.BigDecimal("129.90"))
+                .billingCycle(Subscription.BillingCycle.MONTHLY)
+                .status(Subscription.SubscriptionStatus.CANCELED)
+                .startDate(java.time.LocalDateTime.now().minusDays(90))
+                .build());
+            School school3 = School.builder()
+                .name("Centro de Treinamento BJJ")
+                .slug("centro-treinamento-bjj")
+                .status(SchoolStatus.INACTIVE)
+                .phone("11999999996")
+                .trialEndDate(java.time.LocalDateTime.now().minusDays(60))
+                .owner(owner3)
+                .subscription(sub3)
+                .build();
+            schoolRepository.save(school3);
+
+            // School PAST_DUE
+            SchoolOwner owner4 = schoolOwnerRepository.save(SchoolOwner.builder()
+                .fullName("Ana Oliveira")
+                .email("ana@email.com")
+                .document("12345678904")
+                .phone("11999999997")
+                .build());
+            Subscription sub4 = subscriptionRepository.save(Subscription.builder()
+                .amount(new java.math.BigDecimal("179.90"))
+                .billingCycle(Subscription.BillingCycle.MONTHLY)
+                .status(Subscription.SubscriptionStatus.PAST_DUE)
+                .startDate(java.time.LocalDateTime.now().minusDays(45))
+                .nextBillingDate(java.time.LocalDateTime.now().minusDays(15))
+                .build());
+            School school4 = School.builder()
+                .name("Escola de Artes Marciais")
+                .slug("escola-artes-marciais")
+                .status(SchoolStatus.ACTIVE)
+                .phone("11999999998")
+                .trialEndDate(java.time.LocalDateTime.now().minusDays(30))
+                .owner(owner4)
+                .subscription(sub4)
+                .build();
+            schoolRepository.save(school4);
+
+            // Criar invoices para as schools
+            // School1 (TRIAL) - 1 invoice pendente
+            invoiceRepository.save(Invoice.builder()
+                .school(school1)
+                .subscription(sub1)
+                .referenceMonth(java.time.YearMonth.now())
+                .dueDate(java.time.LocalDate.now().plusDays(10))
+                .amount(sub1.getAmount())
+                .status(Invoice.InvoiceStatus.PENDING)
+                .build());
+
+            // School2 (ACTIVE) - 1 invoice paga, 1 pendente
+            invoiceRepository.save(Invoice.builder()
+                .school(school2)
+                .subscription(sub2)
+                .referenceMonth(java.time.YearMonth.now().minusMonths(1))
+                .dueDate(java.time.LocalDate.now().minusDays(30))
+                .amount(sub2.getAmount())
+                .status(Invoice.InvoiceStatus.PAID)
+                .paidAt(java.time.LocalDateTime.now().minusDays(25))
+                .paymentMethod(Invoice.PaymentMethod.MANUAL)
+                .notes("Pagamento via PIX")
+                .build());
+            invoiceRepository.save(Invoice.builder()
+                .school(school2)
+                .subscription(sub2)
+                .referenceMonth(java.time.YearMonth.now())
+                .dueDate(java.time.LocalDate.now().plusDays(10))
+                .amount(sub2.getAmount())
+                .status(Invoice.InvoiceStatus.PENDING)
+                .build());
+
+            // School3 (INACTIVE) - 1 invoice cancelada
+            invoiceRepository.save(Invoice.builder()
+                .school(school3)
+                .subscription(sub3)
+                .referenceMonth(java.time.YearMonth.now().minusMonths(2))
+                .dueDate(java.time.LocalDate.now().minusDays(60))
+                .amount(sub3.getAmount())
+                .status(Invoice.InvoiceStatus.CANCELED)
+                .notes("Assinatura cancelada")
+                .build());
+
+            // School4 (PAST_DUE) - 1 invoice overdue
+            invoiceRepository.save(Invoice.builder()
+                .school(school4)
+                .subscription(sub4)
+                .referenceMonth(java.time.YearMonth.now().minusMonths(1))
+                .dueDate(java.time.LocalDate.now().minusDays(15))
+                .amount(sub4.getAmount())
+                .status(Invoice.InvoiceStatus.OVERDUE)
+                .build());
+
+            log.info("Invoices de exemplo criadas");
+            log.info("4 schools de exemplo criadas");
+        }
+
         log.info("Dados iniciais verificados!");
+        log.info("Schools: {}", schoolRepository.count());
         log.info("Professores: {}", professorRepository.count());
         log.info("Turmas: {}", turmaRepository.count());
         log.info("Alunos: {}", userRepository.count());
