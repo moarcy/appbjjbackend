@@ -1,67 +1,64 @@
 package bjjapp.controller;
 
+import bjjapp.dto.request.ChamadaRequest;
+import bjjapp.dto.request.MarcarPresencasRequest;
+import bjjapp.dto.response.ChamadaResponse;
 import bjjapp.entity.Chamada;
+import bjjapp.mapper.ChamadaMapper;
 import bjjapp.service.ChamadaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/chamadas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = { "http://localhost:4200", "http://localhost:5173", "http://localhost:3000" })
 public class ChamadaController {
 
     private final ChamadaService chamadaService;
-
-    public record IniciarChamadaRequest(Long turmaId, Long professorId) {}
-    public record MarcarPresencasRequest(Set<Long> alunosIds) {}
+    private final ChamadaMapper chamadaMapper;
 
     @PostMapping("/iniciar")
-    public ResponseEntity<?> iniciar(@RequestBody IniciarChamadaRequest request) {
-        try {
-            if (request.turmaId() == null || request.professorId() == null) {
-                return ResponseEntity.badRequest().body("turmaId e professorId são obrigatórios");
-            }
-            Chamada chamada = chamadaService.iniciar(request.turmaId(), request.professorId());
-            return ResponseEntity.ok(chamada);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ChamadaResponse> iniciar(@Valid @RequestBody ChamadaRequest request) {
+        Chamada chamada = chamadaService.iniciar(request.getTurmaId(), request.getProfessorId());
+        return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
     }
 
     @GetMapping("/findAll")
-    public ResponseEntity<List<Chamada>> findAll() {
-        return ResponseEntity.ok(chamadaService.findAll());
+    public ResponseEntity<List<ChamadaResponse>> findAll() {
+        List<Chamada> chamadas = chamadaService.findAll();
+        return ResponseEntity.ok(chamadaMapper.toResponseList(chamadas));
     }
 
     @GetMapping("/findById/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(chamadaService.findById(id));
+            Chamada chamada = chamadaService.findById(id);
+            return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @GetMapping("/abertas")
-    public ResponseEntity<List<Chamada>> findAbertas() {
+    public ResponseEntity<List<ChamadaResponse>> findAbertas() {
         List<Chamada> abertas = chamadaService.findAbertas();
         if (abertas.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(abertas);
+        return ResponseEntity.ok(chamadaMapper.toResponseList(abertas));
     }
 
     @GetMapping("/turma/{turmaId}")
-    public ResponseEntity<List<Chamada>> findByTurma(@PathVariable Long turmaId) {
-        return ResponseEntity.ok(chamadaService.findByTurmaId(turmaId));
+    public ResponseEntity<List<ChamadaResponse>> findByTurma(@PathVariable Long turmaId) {
+        List<Chamada> chamadas = chamadaService.findByTurmaId(turmaId);
+        return ResponseEntity.ok(chamadaMapper.toResponseList(chamadas));
     }
 
     @GetMapping("/aluno/{alunoId}")
@@ -77,25 +74,31 @@ public class ChamadaController {
                 java.time.LocalDateTime inicio = inicioData.atStartOfDay();
                 java.time.LocalDateTime fim = fimData.atTime(23, 59, 59);
                 Map<String, Object> resultado = chamadaService.getPresencasEausenciasPorPeriodo(alunoId, inicio, fim);
+
+                // Keep returning Map for complex stats, but ensure lists inside are DTOs if
+                // possible?
+                // The service returns a Map. Refactoring service logic is out of scope for this
+                // precise step,
+                // but we can trust the map structure or eventually DTO-ify it. For now, let's
+                // keep it safe.
+
                 return ResponseEntity.ok(Map.of(
-                    "presencas", resultado.get("presencas"),
-                    "ausencias", resultado.get("ausencias"),
-                    "totalChamadas", resultado.get("totalChamadas"),
-                    "totalPresencas", resultado.get("totalPresencas"),
-                    "totalAusencias", resultado.get("totalAusencias"),
-                    "percentualPresenca", resultado.get("percentualPresenca"),
-                    "periodoFiltrado", true,
-                    "dataInicio", startDate,
-                    "dataFim", endDate
-                ));
+                        "presencas", resultado.get("presencas"), // Likely list of objects, ideally should map
+                        "ausencias", resultado.get("ausencias"),
+                        "totalChamadas", resultado.get("totalChamadas"),
+                        "totalPresencas", resultado.get("totalPresencas"),
+                        "totalAusencias", resultado.get("totalAusencias"),
+                        "percentualPresenca", resultado.get("percentualPresenca"),
+                        "periodoFiltrado", true,
+                        "dataInicio", startDate,
+                        "dataFim", endDate));
             } else {
                 List<Chamada> chamadas = chamadaService.findByAlunoId(alunoId);
                 Long totalPresencas = chamadaService.countPresencas(alunoId);
                 return ResponseEntity.ok(Map.of(
-                    "chamadas", chamadas,
-                    "totalPresencas", totalPresencas,
-                    "periodoFiltrado", false
-                ));
+                        "chamadas", chamadaMapper.toResponseList(chamadas),
+                        "totalPresencas", totalPresencas,
+                        "periodoFiltrado", false));
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao buscar chamadas: " + e.getMessage());
@@ -110,7 +113,6 @@ public class ChamadaController {
             @RequestParam(required = false, name = "endDate") String endDate,
             @RequestParam(required = false, name = "inicio") String inicio,
             @RequestParam(required = false, name = "fim") String fim) {
-        // Prioriza startDate/endDate, mas aceita inicio/fim
         String dataInicio = startDate != null ? startDate : inicio;
         String dataFim = endDate != null ? endDate : fim;
         return findByAluno(alunoId, dataInicio, dataFim);
@@ -119,7 +121,8 @@ public class ChamadaController {
     @PostMapping("/{id}/presenca/{alunoId}")
     public ResponseEntity<?> marcarPresenca(@PathVariable Long id, @PathVariable Long alunoId) {
         try {
-            return ResponseEntity.ok(chamadaService.marcarPresenca(id, alunoId));
+            Chamada chamada = chamadaService.marcarPresenca(id, alunoId);
+            return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -128,12 +131,11 @@ public class ChamadaController {
     }
 
     @PostMapping("/{id}/presencas")
-    public ResponseEntity<?> marcarPresencas(@PathVariable Long id, @RequestBody MarcarPresencasRequest request) {
+    public ResponseEntity<?> marcarPresencas(@PathVariable Long id,
+            @Valid @RequestBody MarcarPresencasRequest request) {
         try {
-            if (request.alunosIds() == null || request.alunosIds().isEmpty()) {
-                return ResponseEntity.badRequest().body("alunosIds é obrigatório");
-            }
-            return ResponseEntity.ok(chamadaService.marcarPresencas(id, request.alunosIds()));
+            Chamada chamada = chamadaService.marcarPresencas(id, request.getAlunosIds());
+            return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -144,7 +146,8 @@ public class ChamadaController {
     @DeleteMapping("/{id}/presenca/{alunoId}")
     public ResponseEntity<?> removerPresenca(@PathVariable Long id, @PathVariable Long alunoId) {
         try {
-            return ResponseEntity.ok(chamadaService.removerPresenca(id, alunoId));
+            Chamada chamada = chamadaService.removerPresenca(id, alunoId);
+            return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -155,7 +158,8 @@ public class ChamadaController {
     @PostMapping("/{id}/finalizar")
     public ResponseEntity<?> finalizar(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(chamadaService.finalizar(id));
+            Chamada chamada = chamadaService.finalizar(id);
+            return ResponseEntity.ok(chamadaMapper.toResponse(chamada));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -166,7 +170,7 @@ public class ChamadaController {
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
-            chamadaService.delete(id); // Soft delete: apenas marca como inativo
+            chamadaService.delete(id);
             return ResponseEntity.ok("Chamada deletada com sucesso");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
