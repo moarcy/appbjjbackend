@@ -22,9 +22,14 @@ public class SchoolController {
     private final SchoolService schoolService;
 
     @GetMapping
-    public ResponseEntity<List<School>> findAll() {
+    public ResponseEntity<Map<String, Object>> findAll() {
         List<School> schools = schoolService.findAll();
-        return ResponseEntity.ok(schools);
+        Map<String, Long> summary = schoolService.getSummary();
+        Map<String, Object> response = Map.of(
+            "summary", summary,
+            "schools", schools
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

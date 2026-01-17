@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -68,5 +69,34 @@ public class SchoolService {
         School school = findById(id);
         school.setDeletedAt(LocalDateTime.now());
         schoolRepository.save(school);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getSummary() {
+        List<School> allSchools = schoolRepository.findAll();
+        long active = 0;
+        long trial = 0;
+        long inactive = 0;
+
+        LocalDateTime now = LocalDateTime.now();
+        for (School school : allSchools) {
+            if (school.getDeletedAt() != null) continue; // Skip soft deleted
+
+            if (school.getStatus() == SchoolStatus.INACTIVE) {
+                inactive++;
+            } else if (school.getStatus() == SchoolStatus.ACTIVE) {
+                if (school.getCreatedAt().plusDays(30).isAfter(now)) {
+                    trial++;
+                } else {
+                    active++;
+                }
+            }
+        }
+
+        return Map.of(
+            "active", active,
+            "trial", trial,
+            "inactive", inactive
+        );
     }
 }
