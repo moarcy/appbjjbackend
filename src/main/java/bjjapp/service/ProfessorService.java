@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Service responsável pela gestão de Professores.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -30,7 +33,7 @@ public class ProfessorService {
     @Transactional(readOnly = true)
     public Professor findById(Long id) {
         return professorRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado: " + id));
     }
 
     @Transactional(readOnly = true)

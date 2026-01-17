@@ -20,6 +20,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service responsável pela gestão de Escolas (Tenants), Proprietários e
+ * Assinaturas.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

@@ -86,8 +86,6 @@ public class User {
     @JoinTable(name = "aluno_turmas", joinColumns = @JoinColumn(name = "aluno_id"), inverseJoinColumns = @JoinColumn(name = "turma_id"))
     @JsonIgnoreProperties({ "alunos", "school" })
     @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<Turma> turmas = new HashSet<>();
 
     @Column(nullable = false)

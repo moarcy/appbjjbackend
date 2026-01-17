@@ -57,8 +57,6 @@ public class Turma {
     @ManyToMany(mappedBy = "turmas", fetch = FetchType.EAGER)
     @JsonIgnoreProperties({ "turmas", "chamadas", "school" })
     @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<User> alunos = new HashSet<>();
 
     @NotNull(message = "Nome é obrigatório")
@@ -67,6 +65,5 @@ public class Turma {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id", nullable = false)
-    @ToString.Exclude
     private School school;
 }

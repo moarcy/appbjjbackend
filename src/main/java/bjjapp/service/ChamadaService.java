@@ -11,6 +11,7 @@ import bjjapp.repository.ProfessorRepository;
 import bjjapp.repository.TurmaRepository;
 import bjjapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Service responsável pela gestão de Chamadas (presenças e aulas).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ChamadaService {
 
     private final ChamadaRepository chamadaRepository;
@@ -33,10 +38,11 @@ public class ChamadaService {
     public Chamada iniciar(Long turmaId, Long professorId) {
         Long schoolId = SchoolContext.get();
         Turma turma = turmaRepository.findByIdAndSchoolIdAndDeletedAtIsNull(turmaId, schoolId)
-            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada ou de outra escola: " + turmaId));
+                .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada ou de outra escola: " + turmaId));
 
         Professor professor = professorRepository.findByIdAndSchoolIdAndDeletedAtIsNull(professorId, schoolId)
-            .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado ou de outra escola: " + professorId));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Professor não encontrado ou de outra escola: " + professorId));
 
         // Validação cruzada
         if (!turma.getSchool().equals(professor.getSchool())) {
@@ -44,13 +50,13 @@ public class ChamadaService {
         }
 
         Chamada chamada = Chamada.builder()
-            .turma(turma)
-            .professor(professor)
-            .school(turma.getSchool())
-            .dataHoraInicio(LocalDateTime.now())
-            .finalizada(false)
-            .alunosPresentes(new java.util.HashSet<>())
-            .build();
+                .turma(turma)
+                .professor(professor)
+                .school(turma.getSchool())
+                .dataHoraInicio(LocalDateTime.now())
+                .finalizada(false)
+                .alunosPresentes(new java.util.HashSet<>())
+                .build();
 
         return chamadaRepository.save(chamada);
     }
@@ -64,7 +70,7 @@ public class ChamadaService {
     @Transactional(readOnly = true)
     public Chamada findById(Long id) {
         return chamadaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Chamada não encontrada: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Chamada não encontrada: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -88,44 +94,41 @@ public class ChamadaService {
     @Transactional(readOnly = true)
     public List<Chamada> findByAlunoIdAndPeriodo(Long alunoId, LocalDateTime inicio, LocalDateTime fim) {
         Long schoolId = SchoolContext.get();
-        return chamadaRepository.findByAlunoPresenteAndPeriodoAndSchoolIdAndDeletedAtIsNull(alunoId, inicio, fim, schoolId);
+        return chamadaRepository.findByAlunoPresenteAndPeriodoAndSchoolIdAndDeletedAtIsNull(alunoId, inicio, fim,
+                schoolId);
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> getPresencasEausenciasPorPeriodo(Long alunoId, LocalDateTime inicio, LocalDateTime fim) {
         // LOG: Parâmetros recebidos
-        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - alunoId: " + alunoId);
-        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - inicio: " + inicio);
-        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - fim: " + fim);
+        log.debug("getPresencasEausenciasPorPeriodo - alunoId: {}, inicio: {}, fim: {}", alunoId, inicio, fim);
 
         User aluno = userRepository.findById(alunoId)
-            .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
+                .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
 
         List<Long> turmasIds = aluno.getTurmas().stream()
-            .map(Turma::getId)
-            .toList();
+                .map(Turma::getId)
+                .toList();
 
         if (aluno.getDeletedAt() != null) {
             Long schoolId = SchoolContext.get();
-            List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
+            List<Chamada> todasChamadas = chamadaRepository
+                    .findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
             return Map.of(
-                "presencas", new java.util.ArrayList<>(),
-                "ausencias", todasChamadas,
-                "totalChamadas", todasChamadas.size(),
-                "totalPresencas", 0,
-                "totalAusencias", todasChamadas.size(),
-                "percentualPresenca", 0.0
-            );
+                    "presencas", new java.util.ArrayList<>(),
+                    "ausencias", todasChamadas,
+                    "totalChamadas", todasChamadas.size(),
+                    "totalPresencas", 0,
+                    "totalAusencias", todasChamadas.size(),
+                    "percentualPresenca", 0.0);
         }
 
-        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - turmasIds: " + turmasIds);
+        log.debug("getPresencasEausenciasPorPeriodo - turmasIds: {}", turmasIds);
 
         Long schoolId = SchoolContext.get();
-        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds, inicio, fim, schoolId);
-        System.out.println("[DEBUG] getPresencasEausenciasPorPeriodo - chamadas encontradas: " + todasChamadas.size());
-        for (Chamada chamada : todasChamadas) {
-            System.out.println("[DEBUG] chamadaId: " + chamada.getId() + ", dataHoraInicio: " + chamada.getDataHoraInicio() + ", finalizada: " + chamada.getFinalizada());
-        }
+        List<Chamada> todasChamadas = chamadaRepository.findByTurmasAndPeriodoAndSchoolIdAndDeletedAtIsNull(turmasIds,
+                inicio, fim, schoolId);
+        log.debug("getPresencasEausenciasPorPeriodo - chamadas encontradas: {}", todasChamadas.size());
 
         List<Chamada> presencas = new java.util.ArrayList<>();
         List<Chamada> ausencias = new java.util.ArrayList<>();
@@ -139,13 +142,13 @@ public class ChamadaService {
         }
 
         return Map.of(
-            "presencas", presencas,
-            "ausencias", ausencias,
-            "totalChamadas", todasChamadas.size(),
-            "totalPresencas", presencas.size(),
-            "totalAusencias", ausencias.size(),
-            "percentualPresenca", todasChamadas.isEmpty() ? 0.0 : (double) presencas.size() / todasChamadas.size() * 100
-        );
+                "presencas", presencas,
+                "ausencias", ausencias,
+                "totalChamadas", todasChamadas.size(),
+                "totalPresencas", presencas.size(),
+                "totalAusencias", ausencias.size(),
+                "percentualPresenca",
+                todasChamadas.isEmpty() ? 0.0 : (double) presencas.size() / todasChamadas.size() * 100);
     }
 
     public Chamada marcarPresenca(Long chamadaId, Long alunoId) {
@@ -156,7 +159,7 @@ public class ChamadaService {
         }
 
         User aluno = userRepository.findById(alunoId)
-            .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
+                .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
 
         chamada.marcarPresenca(aluno);
         return chamadaRepository.save(chamada);
@@ -171,7 +174,7 @@ public class ChamadaService {
 
         for (Long alunoId : alunosIds) {
             User aluno = userRepository.findById(alunoId)
-                .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
+                    .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
             chamada.marcarPresenca(aluno);
         }
 
@@ -186,7 +189,7 @@ public class ChamadaService {
         }
 
         User aluno = userRepository.findById(alunoId)
-            .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
+                .orElseThrow(() -> new IllegalArgumentException("Aluno não encontrado: " + alunoId));
 
         chamada.removerPresenca(aluno);
         return chamadaRepository.save(chamada);
@@ -208,8 +211,7 @@ public class ChamadaService {
 
             // Registrar histórico
             historicoService.save(
-                UserHistorico.presenca(aluno, chamada.getTurma().getModalidade().getDescricao())
-            );
+                    UserHistorico.presenca(aluno, chamada.getTurma().getModalidade().getDescricao()));
         }
 
         return chamadaRepository.save(chamada);

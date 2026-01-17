@@ -99,7 +99,12 @@ public class UserService {
         return new UserCreationResponse(saved, username, rawPassword);
     }
 
-    public List<User> findAll() {
+    /**
+     * Retorna todos os usuários com papel de ALUNO ativos.
+     * 
+     * @return Lista de alunos ativos.
+     */
+    public List<User> findAllAlunos() {
         return userRepository.findAllByAtivoTrue().stream()
                 .filter(user -> user.getRole() == Role.ALUNO)
                 .collect(Collectors.toList());

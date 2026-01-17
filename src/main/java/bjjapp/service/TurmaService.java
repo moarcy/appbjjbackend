@@ -12,6 +12,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Service responsável pela gestão de Turmas.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -19,14 +22,22 @@ public class TurmaService {
 
     private final TurmaRepository turmaRepository;
 
+    /**
+     * Cria ou atualiza uma turma.
+     * 
+     * @param turma Entidade Turma
+     * @param dias  Dias da semana
+     * @return Turma salva
+     */
     public Turma save(Turma turma, Set<DiaSemana> dias) {
-        // Verificar duplicata considerando apenas turmas ativas e ignorando a própria turma (em edição)
+        // Verificar duplicata considerando apenas turmas ativas e ignorando a própria
+        // turma (em edição)
         turmaRepository.findByModalidadeAndHorario(turma.getModalidade(), turma.getHorario())
-            .ifPresent(t -> {
-                if (t.isAtivo() && (turma.getId() == null || !t.getId().equals(turma.getId()))) {
-                    throw new IllegalArgumentException("Já existe turma com essa modalidade e horário");
-                }
-            });
+                .ifPresent(t -> {
+                    if (t.isAtivo() && (turma.getId() == null || !t.getId().equals(turma.getId()))) {
+                        throw new IllegalArgumentException("Já existe turma com essa modalidade e horário");
+                    }
+                });
 
         if (dias != null && !dias.isEmpty()) {
             turma.setDias(dias);
@@ -47,7 +58,7 @@ public class TurmaService {
     @Transactional(readOnly = true)
     public Turma findById(Long id) {
         return turmaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada: " + id));
     }
 
     @Transactional(readOnly = true)

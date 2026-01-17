@@ -46,8 +46,7 @@ public class UserController {
 
     @GetMapping("/findAll")
     public ResponseEntity<List<UserResponse>> findAll() {
-        List<User> users = userService.findAll();
-        return ResponseEntity.ok(userMapper.toResponseList(users));
+        return ResponseEntity.ok(userMapper.toResponseList(userService.findAllAlunos()));
     }
 
     @GetMapping("/findById/{id}")

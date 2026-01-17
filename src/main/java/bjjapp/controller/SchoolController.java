@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller responsável pelos endpoints de gestão de Escolas (Super Admin).
+ */
 @RestController
 @RequestMapping("/schools")
 @RequiredArgsConstructor
